@@ -1,0 +1,16 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+*.binlog
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# Test results
+TestResults/

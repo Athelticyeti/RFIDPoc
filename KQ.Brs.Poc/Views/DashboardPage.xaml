@@ -1,0 +1,241 @@
+<Page
+    x:Class="KQ.Brs.Poc.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:KQ.Brs.Poc.Controls"
+    xmlns:vm="using:KQ.Brs.Poc.ViewModels"
+    NavigationCacheMode="Required">
+
+    <Grid Padding="28,12,28,24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header + simulator controls -->
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Ramp reconciliation" Style="{StaticResource PageTitleStyle}" />
+                <TextBlock x:Name="FlightLine" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock x:Name="SimStatusText" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <ComboBox x:Name="SpeedBox" Width="96" SelectionChanged="Speed_Changed" ToolTipService.ToolTip="Simulator speed (virtual bags)">
+                    <x:String>1×</x:String>
+                    <x:String>10×</x:String>
+                    <x:String>30×</x:String>
+                    <x:String>60×</x:String>
+                    <x:String>120×</x:String>
+                </ComboBox>
+                <Button x:Name="SimButton" Click="Sim_Click" Style="{StaticResource AccentButtonStyle}" MinWidth="170">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon x:Name="SimIcon" Glyph="&#xE768;" FontSize="14" />
+                        <TextBlock x:Name="SimLabel" Text="Start virtual bags" />
+                    </StackPanel>
+                </Button>
+                <Button Click="AddPassenger_Click" ToolTipService.ToolTip="Add a passenger and keep their bags for the next real tags at Desk 14">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE8FA;" FontSize="14" />
+                        <TextBlock Text="Add passenger" />
+                    </StackPanel>
+                </Button>
+                <Button Click="PrePushback_Click" ToolTipService.ToolTip="FR-10: bags checked in but not loaded, and bags to offload">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE709;" FontSize="14" />
+                        <TextBlock Text="Pre-pushback check" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Totals tiles (spec 7.1) -->
+        <Grid Grid.Row="1" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <controls:StatTile x:Name="ExpectedTile" Glyph="&#xE7B8;" Title="Total expected (BSM)" />
+            <controls:StatTile x:Name="CheckInTile" Grid.Column="1" Glyph="&#xE8EC;" Title="Check-in verified · Desk 14" />
+            <controls:StatTile x:Name="SorterTile" Grid.Column="2" Glyph="&#xE8B1;" Title="Sorter verified · Belt 04" />
+            <controls:StatTile x:Name="LoadedTile" Grid.Column="3" Glyph="&#xE7C3;" Title="Hold loaded &amp; cleared" />
+            <controls:StatTile x:Name="ExceptionsTile" Grid.Column="4" Glyph="&#xE7BA;" Title="Open exceptions" ShowBar="False" />
+        </Grid>
+
+        <!-- Lane & containers -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="20,14">
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE8EC;" FontSize="20" />
+                    <StackPanel>
+                        <TextBlock Text="Check-in · Desk 14" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="LaneDesk" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                </StackPanel>
+                <FontIcon Grid.Column="1" Glyph="&#xE76C;" FontSize="14" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE8B1;" FontSize="20" />
+                    <StackPanel>
+                        <TextBlock Text="Sorting tunnel · Belt 04" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="LaneBelt" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                </StackPanel>
+                <FontIcon Grid.Column="3" Glyph="&#xE76C;" FontSize="14" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="12">
+                    <Border CornerRadius="6" Padding="14,8" Background="{ThemeResource LaneBrush}">
+                        <StackPanel>
+                            <TextBlock Text="ULD AK7 · Hold 2" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="LaneAk7" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="6" Padding="14,8" Background="{ThemeResource LaneBrush}">
+                        <StackPanel>
+                            <TextBlock Text="ULD AK8 · Hold 2" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="LaneAk8" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="24" VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="Offloaded" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="LaneOffloaded" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Real tags bound" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="LaneReal" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Stray reads" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="LaneStray" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Bag list -->
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Padding="16,12" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="260" />
+                    </Grid.ColumnDefinitions>
+                    <SelectorBar x:Name="FilterBar" SelectionChanged="Filter_Changed">
+                        <SelectorBarItem Text="All" Tag="All" IsSelected="True" />
+                        <SelectorBarItem x:Name="RealTagsFilter" Text="Real tags" Tag="Real" />
+                        <SelectorBarItem Text="In progress" Tag="Progress" />
+                        <SelectorBarItem Text="Loaded" Tag="Loaded" />
+                        <SelectorBarItem Text="Exceptions" Tag="Exception" />
+                        <SelectorBarItem Text="Not checked in" Tag="Expected" />
+                        <SelectorBarItem Text="Other flights" Tag="Foreign" />
+                    </SelectorBar>
+                    <ComboBox x:Name="UldFilter" Grid.Column="1" SelectedIndex="0" Width="120" VerticalAlignment="Center" SelectionChanged="Filter_Changed">
+                        <x:String>Any ULD</x:String>
+                        <x:String>AK7</x:String>
+                        <x:String>AK8</x:String>
+                    </ComboBox>
+                    <TextBlock x:Name="CountText" Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <AutoSuggestBox x:Name="SearchBox" Grid.Column="3" PlaceholderText="Search plate, passenger or EPC" QueryIcon="Find"
+                                    TextChanged="Search_TextChanged" VerticalAlignment="Center" />
+                </Grid>
+
+                <!-- Column headers (widths shared with the item template) -->
+                <Grid Grid.Row="1" Padding="16,8,16,8" ColumnSpacing="12" Background="{ThemeResource LayerFillColorAltBrush}"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="92" />
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="64" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="LICENCE PLATE" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="1" Text="PASSENGER" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="2" Text="CLASS" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="3" Text="TAG" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="4" Text="CHECK-IN · SORT · LOAD" Style="{StaticResource ColumnHeaderStyle}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="5" Text="STATUS" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="6" Text="LAST SCAN POINT" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="7" Text="LAST SEEN" Style="{StaticResource ColumnHeaderStyle}" />
+                    <TextBlock Grid.Column="8" Text="ULD" Style="{StaticResource ColumnHeaderStyle}" />
+                </Grid>
+
+                <ListView x:Name="BagList" Grid.Row="2" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Bag_Click" Padding="0,4,0,8">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BagRowViewModel">
+                            <Grid ColumnSpacing="12" Padding="0,6" ToolTipService.ToolTip="{x:Bind SourceText}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="36" />
+                                    <ColumnDefinition Width="92" />
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="64" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind Plate}" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Passenger, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                                    <Border Visibility="{x:Bind vm:Ui.Visible(IsOtherFlight), Mode=OneWay}" CornerRadius="4" Padding="6,0"
+                                            Background="{ThemeResource SystemFillColorCautionBackgroundBrush}">
+                                        <TextBlock Text="{x:Bind FlightText, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{x:Bind ClassText}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <FontIcon Grid.Column="3" Glyph="{x:Bind SourceGlyph, Mode=OneWay}" FontSize="14" HorizontalAlignment="Left"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Ellipse Width="10" Height="10" Fill="{x:Bind vm:Ui.StageBrush(DeskDone), Mode=OneWay}" />
+                                    <Ellipse Width="10" Height="10" Fill="{x:Bind vm:Ui.StageBrush(BeltDone), Mode=OneWay}" />
+                                    <Ellipse Width="10" Height="10" Fill="{x:Bind vm:Ui.StageBrush(RampDone), Mode=OneWay}" />
+                                </StackPanel>
+                                <Border Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" CornerRadius="10" Padding="10,2"
+                                        BorderThickness="1.5" BorderBrush="{x:Bind vm:Ui.BadgeBrush(Badge), Mode=OneWay}">
+                                    <TextBlock Text="{x:Bind BadgeText, Mode=OneWay}" FontSize="11" FontWeight="Bold"
+                                               Foreground="{x:Bind vm:Ui.BadgeBrush(Badge), Mode=OneWay}" />
+                                </Border>
+                                <TextBlock Grid.Column="6" Text="{x:Bind LastScanPointText, Mode=OneWay}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="7" Text="{x:Bind LastSeenText, Mode=OneWay}" VerticalAlignment="Center"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Grid.Column="8" Text="{x:Bind UldText, Mode=OneWay}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

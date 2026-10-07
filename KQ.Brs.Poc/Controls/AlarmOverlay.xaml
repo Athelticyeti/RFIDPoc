@@ -1,0 +1,91 @@
+<UserControl
+    x:Class="KQ.Brs.Poc.Controls.AlarmOverlay"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <Storyboard x:Name="Pulse" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="Glow" Storyboard.TargetProperty="Opacity" From="0.35" To="1" Duration="0:0:0.6" />
+        </Storyboard>
+    </UserControl.Resources>
+
+    <!-- Full-window, input-swallowing lock screen (spec 7.2 step 2). -->
+    <Grid Background="{ThemeResource AlarmBackgroundBrush}">
+        <Border x:Name="Glow" BorderBrush="#FFFF3B30" BorderThickness="10" />
+
+        <Border MaxWidth="760" Margin="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" CornerRadius="12" Padding="40,32"
+                BorderBrush="#FFFF3B30" BorderThickness="2">
+            <StackPanel Spacing="18">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <Border Width="64" Height="64" CornerRadius="32" Background="#FFD70022">
+                        <FontIcon Glyph="&#xE7BA;" FontSize="32" Foreground="White" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="DO NOT LOAD" FontSize="40" FontWeight="Bold" Foreground="#FFD70022" />
+                        <TextBlock x:Name="TypeText" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Grid ColumnSpacing="24" RowSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Licence plate" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="PlateText" Grid.Column="1" FontSize="20" FontWeight="SemiBold" FontFamily="Cascadia Mono, Consolas" />
+                    <TextBlock Grid.Row="1" Text="Passenger" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="PaxText" Grid.Row="1" Grid.Column="1" FontSize="16" />
+                    <TextBlock Grid.Row="2" Text="Belongs to" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="BelongsText" Grid.Row="2" Grid.Column="1" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="3" Text="Seen at" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Name="SeenText" Grid.Row="3" Grid.Column="1" FontSize="16" />
+                </Grid>
+
+                <TextBlock x:Name="MessageText" TextWrapping="Wrap" Style="{StaticResource BodyTextBlockStyle}" />
+
+                <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" Title="To clear this alarm"
+                         Message="Move the bag to where it belongs, then scan it with the handheld (ramp antenna 3). The screen unlocks after the rescan, or with a supervisor override." />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button x:Name="RescanButton" Click="Rescan_Click" Style="{StaticResource AccentButtonStyle}" MinHeight="48" MinWidth="180">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE8EA;" FontSize="16" />
+                            <TextBlock Text="Ready to rescan" />
+                        </StackPanel>
+                    </Button>
+                    <Button Click="ShowOverride_Click" MinHeight="48" MinWidth="180">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE72E;" FontSize="16" />
+                            <TextBlock Text="Supervisor override" />
+                        </StackPanel>
+                    </Button>
+                    <ToggleButton x:Name="MuteButton" Click="Mute_Click" MinHeight="48" ToolTipService.ToolTip="Silence the alarm sound">
+                        <FontIcon Glyph="&#xE74F;" FontSize="16" />
+                    </ToggleButton>
+                </StackPanel>
+                <TextBlock x:Name="RescanHint" Visibility="Collapsed" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="Waiting for the tag at the ramp antenna… (the next read of this tag counts as the rescan)" />
+
+                <StackPanel x:Name="OverridePanel" Visibility="Collapsed" Spacing="10" Padding="16"
+                            Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8">
+                    <TextBlock Text="Supervisor override" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <PasswordBox x:Name="PinBox" Header="Supervisor PIN" Width="200" HorizontalAlignment="Left" />
+                    <TextBox x:Name="ReasonBox" Header="Reason (recorded in the audit trail)" PlaceholderText="e.g. Bag re-tagged and re-checked by supervisor" />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Content="Confirm override" Click="Override_Click" Style="{StaticResource AccentButtonStyle}" />
+                        <TextBlock x:Name="OverrideError" VerticalAlignment="Center" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock x:Name="QueueText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

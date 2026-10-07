@@ -1,0 +1,301 @@
+<title>KQ-504 Boardroom Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: one A4 landscape sheet — plan across the top, three station cards, then checklist / kit / assumptions. */
+  :root {
+    --paper: #ffffff;
+    --ink: #17181c;
+    --muted: #5d6170;
+    --line: #c9ccd6;
+    --faint: #eef0f5;
+    --accent: #c8102e;       /* Kenya Airways red */
+    --desk: #1f63a8;         /* take-on zone */
+    --belt: #a25e00;         /* tunnel zone */
+    --ramp: #2b7a35;         /* ramp zone */
+    --ops: #5b4bb0;          /* operator station (kept muted) */
+    --display: "Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+    --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #14161b; --ink: #eceef3; --muted: #a2a7b6; --line: #3a3f4c; --faint: #1d2027;
+      --accent: #ff5a6e; --desk: #6aaaf0; --belt: #e3a046; --ramp: #6cc276; --ops: #a99cf2;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #14161b; --ink: #eceef3; --muted: #a2a7b6; --line: #3a3f4c; --faint: #1d2027;
+    --accent: #ff5a6e; --desk: #6aaaf0; --belt: #e3a046; --ramp: #6cc276; --ops: #a99cf2;
+    color-scheme: dark;
+  }
+
+  body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 13px; line-height: 1.38; }
+  .sheet { max-width: 1180px; margin: 0 auto; padding-block: 20px 28px; padding-inline: 20px; display: grid; gap: 14px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px;
+           border-bottom: 3px solid var(--accent); padding-bottom: 8px; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: 30px; letter-spacing: .01em; margin: 0; line-height: 1; text-wrap: balance; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 13px; }
+  .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; }
+
+  .plan { border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
+  .plan svg { display: block; width: 100%; min-width: 760px; height: auto; }
+  .plan text { font-family: var(--body); fill: var(--ink); }
+  .room { fill: var(--paper); stroke: var(--ink); stroke-width: 3; }
+  .walk { fill: var(--faint); }
+  .table { fill: var(--faint); stroke: var(--muted); stroke-width: 1.5; }
+  .seat { fill: var(--paper); stroke: var(--muted); stroke-width: 1; }
+  .furn { fill: var(--paper); stroke: var(--muted); stroke-width: 1.2; }
+  .route { stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 8 6; fill: none; }
+  .cable { stroke: var(--ops); stroke-width: 1.3; stroke-dasharray: 2 4; fill: none; }
+  .dim { stroke: var(--muted); stroke-width: 1; fill: none; }
+  .tick { stroke: var(--muted); stroke-width: 1; }
+  .small { font-size: 11px; fill: var(--muted) !important; }
+  .label { font-family: var(--display) !important; font-weight: 700; font-size: 14px; letter-spacing: .04em; }
+  .num { font-family: var(--mono) !important; font-size: 10.5px; fill: var(--muted) !important; }
+  .ant-desk { fill: var(--desk); } .ant-belt { fill: var(--belt); } .ant-ramp { fill: var(--ramp); } .ops { fill: var(--ops); }
+  .beam-belt { fill: var(--belt); opacity: .18; }
+  .t-desk { fill: var(--desk) !important; } .t-belt { fill: var(--belt) !important; } .t-ramp { fill: var(--ramp) !important; } .t-ops { fill: var(--ops) !important; } .t-acc { fill: var(--accent) !important; }
+  .white { fill: #fff !important; font-family: var(--mono) !important; font-size: 11px; font-weight: 600; }
+  .screen { stroke: var(--ink); stroke-width: 7; }
+
+  .stations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .st { border-top: 5px solid var(--c); padding: 8px 2px 0; display: grid; gap: 4px; align-content: start; min-width: 0; }
+  .st h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: .03em; color: var(--c); line-height: 1.1; }
+  .st h2 small { display: block; font-family: var(--mono); font-weight: 400; font-size: 11px; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+  dl { margin: 0; display: grid; grid-template-columns: 74px 1fr; gap: 2px 8px; }
+  dt { font-family: var(--display); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; color: var(--muted); padding-top: 1px; }
+  dd { margin: 0; min-width: 0; }
+
+  .lower { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, .9fr); gap: 16px; }
+  .lower h3 { margin: 0 0 4px; font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+  ol.check { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+  ol.check li { display: grid; grid-template-columns: 54px 14px 1fr; gap: 6px; align-items: baseline; }
+  .when { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .box { width: 11px; height: 11px; border: 1.5px solid var(--ink); border-radius: 2px; display: inline-block; transform: translateY(1px); }
+  ul.kit { margin: 0; padding-left: 16px; display: grid; gap: 2px; }
+  .note { background: var(--faint); border-radius: 6px; padding: 8px 10px; display: grid; gap: 4px; align-content: start; }
+  .note p { margin: 0; }
+  code, .mono { font-family: var(--mono); font-size: 11.5px; }
+  b { font-weight: 600; }
+
+  @media screen and (max-width: 760px) {
+    .stations, .lower { grid-template-columns: 1fr; }
+    header { align-items: flex-start; }
+    .meta { text-align: left; }
+  }
+
+  @page { size: A4 landscape; margin: 8mm; }
+  @media print {
+    :root { --paper: #fff; --ink: #17181c; --muted: #555a66; --line: #c9ccd6; --faint: #f0f1f5; }
+    body { font-size: 9.6px; line-height: 1.24; }
+    .sheet { max-width: none; padding: 0; gap: 5px; }
+    h1 { font-size: 21px; }
+    .sub, .meta { font-size: 10px; }
+    .lower h3 { margin-bottom: 2px; font-size: 12px; }
+    .note { padding: 6px 8px; gap: 2px; }
+    ol.check, ul.kit { gap: 1px; }
+    .plan svg { min-width: 0; height: 74mm; }
+    .st h2 { font-size: 15px; }
+    dl { grid-template-columns: 64px 1fr; }
+    ol.check li { grid-template-columns: 46px 12px 1fr; gap: 4px; }
+  }
+</style>
+
+<div class="sheet">
+  <header>
+    <div>
+      <h1>KQ-504 baggage demo · <span>boardroom setup</span></h1>
+      <div class="sub">Floor plan for the setup team. One Alien ALR-9900+ reader, four antennas, three airport areas. A bag travels left to right: check-in (take-on) → sorting tunnel → loading at Hold 2.</div>
+    </div>
+    <div class="meta">Room ≈ 15 m × 6 m · scale 1 square = 1 m<br>Reader 192.168.0.161 · laptop 192.168.0.3</div>
+  </header>
+
+  <!-- Plan: 60 px per metre; room origin at (50, 30). -->
+  <div class="plan" role="img" aria-label="Floor plan of a 15 metre boardroom with the take-on desk at 2.5 metres, the sorting tunnel at 7.5 metres and the ramp at 12.5 metres along a walkway, the reader and laptop against the wall in the middle, and the boardroom table with seating below.">
+    <svg viewBox="0 0 1000 452" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse" x="50" y="30">
+          <path d="M60 0H0V60" fill="none" stroke="var(--line)" stroke-width=".6" opacity=".55"/>
+        </pattern>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0L10 5L0 10z" fill="var(--accent)"/>
+        </marker>
+        <marker id="dimEnd" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 0L10 5L0 10z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <!-- Room -->
+      <rect class="room" x="50" y="30" width="900" height="360"/>
+      <rect x="50" y="30" width="900" height="360" fill="url(#grid)"/>
+
+      <!-- Walkway (the "belt" route) -->
+      <rect class="walk" x="50" y="90" width="900" height="96"/>
+      <text class="small" x="64" y="104">Walkway — keep clear, presenter carries bags along here</text>
+
+      <!-- Screen on the left wall -->
+      <line class="screen" x1="53" y1="200" x2="53" y2="300"/>
+      <text class="label" x="66" y="255" transform="rotate(-90 66 255)" text-anchor="middle">SCREEN</text>
+
+      <!-- Boardroom table + seats -->
+      <rect class="table" x="260" y="210" width="480" height="84" rx="10"/>
+      <text class="small" x="500" y="257" text-anchor="middle">Boardroom table (audience)</text>
+      <g class="seats">
+        <circle class="seat" cx="290" cy="198" r="7"/><circle class="seat" cx="350" cy="198" r="7"/><circle class="seat" cx="410" cy="198" r="7"/>
+        <circle class="seat" cx="590" cy="198" r="7"/><circle class="seat" cx="650" cy="198" r="7"/><circle class="seat" cx="710" cy="198" r="7"/>
+        <circle class="seat" cx="290" cy="306" r="7"/><circle class="seat" cx="350" cy="306" r="7"/><circle class="seat" cx="410" cy="306" r="7"/>
+        <circle class="seat" cx="470" cy="306" r="7"/><circle class="seat" cx="530" cy="306" r="7"/><circle class="seat" cx="590" cy="306" r="7"/>
+        <circle class="seat" cx="650" cy="306" r="7"/><circle class="seat" cx="710" cy="306" r="7"/>
+        <circle class="seat" cx="248" cy="252" r="7"/><circle class="seat" cx="752" cy="252" r="7"/>
+      </g>
+
+      <!-- Bag route -->
+      <path class="route" d="M212 140 H788" marker-end="url(#arrow)"/>
+
+      <!-- Distances along the route -->
+      <path class="dim" d="M200 172 H500" marker-start="url(#dimEnd)" marker-end="url(#dimEnd)"/>
+      <text class="num" x="350" y="182" text-anchor="middle">5 m</text>
+      <path class="dim" d="M500 172 H800" marker-start="url(#dimEnd)" marker-end="url(#dimEnd)"/>
+      <text class="num" x="650" y="182" text-anchor="middle">5 m</text>
+
+      <!-- Cables from the reader -->
+      <path class="cable" d="M512 66 C 420 76, 300 70, 212 64"/>
+      <path class="cable" d="M524 66 C 620 76, 700 70, 788 64"/>
+      <path class="cable" d="M512 72 L500 98"/>
+      <path class="cable" d="M528 72 C 560 120, 540 150, 512 160"/>
+      <text class="small t-ops" x="338" y="84">antenna cable ≤ 6 m</text>
+      <text class="small t-ops" x="536" y="167">cable cover here</text>
+
+      <!-- Operator station: reader + laptop + tag tin -->
+      <rect class="furn" x="470" y="36" width="96" height="42" rx="3"/>
+      <rect class="ops" x="490" y="48" width="38" height="20" rx="2"/>
+      <text class="white" x="509" y="62" text-anchor="middle">RDR</text>
+      <rect x="534" y="48" width="24" height="16" rx="2" fill="none" stroke="var(--ops)" stroke-width="1.6"/>
+      <circle cx="480" cy="58" r="7" fill="none" stroke="var(--ops)" stroke-width="1.6"/>
+      <text class="label t-ops" x="580" y="50">OPERATOR</text>
+      <text class="small" x="580" y="64">reader · laptop · tag tin</text>
+
+      <!-- Station 1: take-on desk, antenna 0 -->
+      <rect class="furn" x="170" y="40" width="60" height="44" rx="3"/>
+      <rect class="ant-desk" x="188" y="50" width="24" height="24" rx="3"/>
+      <text class="white" x="200" y="66" text-anchor="middle">0</text>
+      <text class="label t-desk" x="160" y="56" text-anchor="end">TAKE-ON</text>
+      <text class="small" x="160" y="70" text-anchor="end">Desk 14 · faces up</text>
+
+      <!-- Station 2: tunnel, antennas 1 + 2 facing each other across the walkway -->
+      <path class="beam-belt" d="M488 106 L512 106 L540 154 L460 154 Z"/>
+      <path class="beam-belt" d="M488 162 L512 162 L540 114 L460 114 Z" transform="translate(0,0)"/>
+      <rect class="ant-belt" x="488" y="94" width="24" height="16" rx="3"/>
+      <text class="white" x="500" y="106" text-anchor="middle">1</text>
+      <rect class="ant-belt" x="488" y="160" width="24" height="16" rx="3"/>
+      <text class="white" x="500" y="172" text-anchor="middle">2</text>
+      <text class="label t-belt" x="552" y="118">SORTING TUNNEL</text>
+      <text class="small" x="552" y="131">Belt 04 · antennas face each other, 0.7–0.8 m gap</text>
+
+      <!-- Station 3: ramp, antenna 3, ULD boxes -->
+      <rect class="furn" x="770" y="40" width="60" height="44" rx="3"/>
+      <rect class="ant-ramp" x="788" y="50" width="24" height="24" rx="3"/>
+      <text class="white" x="800" y="66" text-anchor="middle">3</text>
+      <rect class="furn" x="842" y="42" width="36" height="30" rx="2"/>
+      <text class="num" x="860" y="61" text-anchor="middle" style="fill: var(--ramp) !important; font-weight: 600">AK7</text>
+      <rect class="furn" x="884" y="42" width="36" height="30" rx="2"/>
+      <text class="num" x="902" y="61" text-anchor="middle" style="fill: var(--ramp) !important; font-weight: 600">AK8</text>
+      <text class="label t-ramp" x="842" y="88">LOADING · HOLD 2</text>
+
+      <!-- Width note -->
+      <text class="small" x="968" y="210" transform="rotate(90 968 210)" text-anchor="middle">≈ 6 m (adjust to the room)</text>
+
+      <!-- Scale along the length -->
+      <line class="tick" x1="50" y1="404" x2="950" y2="404"/>
+      <g class="tick">
+        <line x1="50" y1="398" x2="50" y2="410"/><line x1="110" y1="401" x2="110" y2="407"/><line x1="170" y1="401" x2="170" y2="407"/>
+        <line x1="200" y1="398" x2="200" y2="410"/><line x1="230" y1="401" x2="230" y2="407"/><line x1="290" y1="401" x2="290" y2="407"/>
+        <line x1="350" y1="398" x2="350" y2="410"/><line x1="410" y1="401" x2="410" y2="407"/><line x1="470" y1="401" x2="470" y2="407"/>
+        <line x1="500" y1="398" x2="500" y2="410"/><line x1="530" y1="401" x2="530" y2="407"/><line x1="590" y1="401" x2="590" y2="407"/>
+        <line x1="650" y1="398" x2="650" y2="410"/><line x1="710" y1="401" x2="710" y2="407"/><line x1="770" y1="401" x2="770" y2="407"/>
+        <line x1="800" y1="398" x2="800" y2="410"/><line x1="830" y1="401" x2="830" y2="407"/><line x1="890" y1="401" x2="890" y2="407"/>
+        <line x1="950" y1="398" x2="950" y2="410"/>
+      </g>
+      <text class="num" x="50" y="424" text-anchor="middle">0 m</text>
+      <text class="num" x="200" y="424" text-anchor="middle">2.5</text>
+      <text class="num" x="350" y="424" text-anchor="middle">5</text>
+      <text class="num" x="500" y="424" text-anchor="middle">7.5</text>
+      <text class="num" x="650" y="424" text-anchor="middle">10</text>
+      <text class="num" x="800" y="424" text-anchor="middle">12.5</text>
+      <text class="num" x="950" y="424" text-anchor="middle">15 m</text>
+      <text class="small" x="50" y="444">Screen end</text>
+      <text class="small" x="950" y="444" text-anchor="end">Far end</text>
+    </svg>
+  </div>
+
+  <section class="stations" aria-label="Stations">
+    <div class="st" style="--c: var(--desk)">
+      <h2>1 · Check-in (take-on) — Desk 14<small>antenna port 0</small></h2>
+      <dl>
+        <dt>Where</dt><dd><b>2.5 m</b> from the screen wall, beside the walkway.</dd>
+        <dt>Mount</dt><dd>Flat on a small table or chair, <b>facing up</b>. Hold the bag 20–30 cm above it.</dd>
+        <dt>Props</dt><dd>Luggage labels and a marker: write the licence plate from the "tag printed" toast on the bag.</dd>
+        <dt>Screen</dt><dd>Bag tag printed → bag <b>CheckedIn</b>.</dd>
+      </dl>
+    </div>
+    <div class="st" style="--c: var(--belt)">
+      <h2>2 · Sorting tunnel — Belt 04<small>antenna ports 1 + 2</small></h2>
+      <dl>
+        <dt>Where</dt><dd>Room centre, <b>7.5 m</b>, one antenna each side of the walkway.</dd>
+        <dt>Mount</dt><dd>On chairs or stands at <b>waist height</b>, <b>facing each other</b>, 0.7–0.8 m apart. Walk through with the bag at your side.</dd>
+        <dt>Screen</dt><dd>Bag <b>Sorted</b> + BPM sent. A KQ-412 bag sets off the alarm here.</dd>
+      </dl>
+    </div>
+    <div class="st" style="--c: var(--ramp)">
+      <h2>3 · Loading — Hold 2<small>antenna port 3</small></h2>
+      <dl>
+        <dt>Where</dt><dd><b>2.5 m</b> from the far wall, beside the walkway.</dd>
+        <dt>Mount</dt><dd>Flat, <b>facing up</b>. Two open boxes labelled <b>AK7</b> and <b>AK8</b> next to it.</dd>
+        <dt>Screen</dt><dd>Green <b>LOAD → AK7/AK8</b> or red <b>DO NOT LOAD</b>. Arm the ramp in the app only when loading.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="lower">
+    <div>
+      <h3>Setup checklist</h3>
+      <ol class="check">
+        <li><span class="when">T−60</span><span class="box"></span><span>Tape floor marks at 2.5 m, 7.5 m, 12.5 m. Place the three stations and the operator table against the wall at the centre.</span></li>
+        <li><span class="when">T−50</span><span class="box"></span><span>Plug antennas into reader ports <b>0, 1, 2, 3</b> exactly as above. Tape cables down; cable cover where port 2 crosses the walkway.</span></li>
+        <li><span class="when">T−45</span><span class="box"></span><span>Power the reader, network cable to the laptop, HDMI to the screen. Close RFIDPoc.</span></li>
+        <li><span class="when">T−40</span><span class="box"></span><span>Start <b>KQ.Brs.Poc</b>. Allow it through Windows Firewall if asked. Reader pill turns green: "Reader streaming".</span></li>
+        <li><span class="when">T−35</span><span class="box"></span><span><b>Calibrate</b> on Live reads: all tags in the tin → all four antennas at 0 reads/s. Walk one tag desk → tunnel → ramp; only that area's antenna should read.</span></li>
+        <li><span class="when">T−25</span><span class="box"></span><span>Cross-reads? Settings → Antenna → <b>Min RSSI</b> halfway between the weak and strong reading (e.g. 1,500 and 9,000 → 4,000). Save, walk again.</span></li>
+        <li><span class="when">T−10</span><span class="box"></span><span>Settings → <b>Reset demo</b> (empty flight, bindings unticked). Dashboard → <b>Add passenger</b> for each guest. Loading page: ULD <b>AK8</b>, loading antenna <b>not armed</b>.</span></li>
+        <li><span class="when">T−0</span><span class="box"></span><span>Screen on the Dashboard. Spare tags in the closed tin.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h3>Kit</h3>
+      <ul class="kit">
+        <li>ALR-9900+ reader and power supply</li>
+        <li>4 antennas + 4 cables (<b>check ≥ 6 m</b>)</li>
+        <li>Network cable reader ↔ laptop</li>
+        <li>Laptop with KQ.Brs.Poc, HDMI to screen</li>
+        <li>2 small tables or chairs (desk, ramp)</li>
+        <li>2 chairs or stands (tunnel)</li>
+        <li>2 boxes labelled AK7 and AK8</li>
+        <li>Metal tin with lid (tag store)</li>
+        <li>3–5 tagged props, luggage labels, marker</li>
+        <li>Gaffer tape and a cable cover</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Assumptions</h3>
+      <p>Room about 15 × 6 m with the screen at one end. Reader and laptop sit at the centre so every antenna is within <b>5 m</b> of the reader.</p>
+      <p>Cables shorter than 6 m? Move the desk and ramp inwards to the cable limit and keep the tunnel centred.</p>
+      <p>Reader power stays at full (<span class="mono">RFAttenuation 0</span>) unless Min RSSI can't stop cross-reads.</p>
+      <p>Two people: a presenter carries the bags; an operator drives the laptop.</p>
+    </div>
+  </section>
+</div>

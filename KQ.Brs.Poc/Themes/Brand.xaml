@@ -1,0 +1,87 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="StatusMatchedBrush" Color="#0F7B0F" />
+            <SolidColorBrush x:Key="StatusInScanBrush" Color="#9D5D00" />
+            <SolidColorBrush x:Key="StatusExceptionBrush" Color="#D83B01" />
+            <SolidColorBrush x:Key="StatusMissingBrush" Color="#5C5C5C" />
+            <SolidColorBrush x:Key="StatusExpectedBrush" Color="#8A8A8A" />
+            <SolidColorBrush x:Key="StatusOffloadedBrush" Color="#005FB8" />
+            <SolidColorBrush x:Key="AlarmBackgroundBrush" Color="#F2B00020" />
+            <SolidColorBrush x:Key="LaneBrush" Color="#14000000" />
+            <!-- Live map -->
+            <SolidColorBrush x:Key="MapGround" Color="#E9EDF2" />
+            <SolidColorBrush x:Key="MapGrid" Color="#14000000" />
+            <SolidColorBrush x:Key="MapZone" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="MapZoneStroke" Color="#C3CAD5" />
+            <SolidColorBrush x:Key="MapTarmac" Color="#D7DCE3" />
+            <SolidColorBrush x:Key="MapRegion" Color="#F4F6F9" />
+            <SolidColorBrush x:Key="MapRegionStroke" Color="#B9C1CD" />
+            <SolidColorBrush x:Key="MapProblemRegion" Color="#14D83B01" />
+            <SolidColorBrush x:Key="MapLabel" Color="#5A6372" />
+            <SolidColorBrush x:Key="MapTitle" Color="#1E2430" />
+            <SolidColorBrush x:Key="MapBelt" Color="#3A404C" />
+            <SolidColorBrush x:Key="MapBeltStripe" Color="#8A93A3" />
+            <SolidColorBrush x:Key="MapTunnel" Color="#262B35" />
+            <SolidColorBrush x:Key="MapCounter" Color="#E2E7EE" />
+            <SolidColorBrush x:Key="MapAircraft" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="MapAircraftStroke" Color="#8C96A6" />
+            <SolidColorBrush x:Key="MapUld" Color="#EEF1F5" />
+            <SolidColorBrush x:Key="MapMarking" Color="#E0B000" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="StatusMatchedBrush" Color="#6CCB5F" />
+            <SolidColorBrush x:Key="StatusInScanBrush" Color="#FCE100" />
+            <SolidColorBrush x:Key="StatusExceptionBrush" Color="#FF8C5A" />
+            <SolidColorBrush x:Key="StatusMissingBrush" Color="#B4B4B4" />
+            <SolidColorBrush x:Key="StatusExpectedBrush" Color="#8A8A8A" />
+            <SolidColorBrush x:Key="StatusOffloadedBrush" Color="#60CDFF" />
+            <SolidColorBrush x:Key="AlarmBackgroundBrush" Color="#F2700014" />
+            <SolidColorBrush x:Key="LaneBrush" Color="#1AFFFFFF" />
+            <!-- Live map -->
+            <SolidColorBrush x:Key="MapGround" Color="#12151A" />
+            <SolidColorBrush x:Key="MapGrid" Color="#12FFFFFF" />
+            <SolidColorBrush x:Key="MapZone" Color="#1C2028" />
+            <SolidColorBrush x:Key="MapZoneStroke" Color="#343B48" />
+            <SolidColorBrush x:Key="MapTarmac" Color="#191D24" />
+            <SolidColorBrush x:Key="MapRegion" Color="#22272F" />
+            <SolidColorBrush x:Key="MapRegionStroke" Color="#3D4552" />
+            <SolidColorBrush x:Key="MapProblemRegion" Color="#22FF8C5A" />
+            <SolidColorBrush x:Key="MapLabel" Color="#9AA3B2" />
+            <SolidColorBrush x:Key="MapTitle" Color="#E8EBF0" />
+            <SolidColorBrush x:Key="MapBelt" Color="#0B0D11" />
+            <SolidColorBrush x:Key="MapBeltStripe" Color="#4C5463" />
+            <SolidColorBrush x:Key="MapTunnel" Color="#05070A" />
+            <SolidColorBrush x:Key="MapCounter" Color="#2A303A" />
+            <SolidColorBrush x:Key="MapAircraft" Color="#2A303A" />
+            <SolidColorBrush x:Key="MapAircraftStroke" Color="#5A6474" />
+            <SolidColorBrush x:Key="MapUld" Color="#262B34" />
+            <SolidColorBrush x:Key="MapMarking" Color="#B89000" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!--
+        Brand accent: Kenya Airways red. Change these colours to re-theme the whole app (buttons, toggles,
+        selection indicators, progress). Light/Dark variants follow Fluent's accent ramp.
+    -->
+    <Color x:Key="SystemAccentColor">#C8102E</Color>
+    <Color x:Key="SystemAccentColorLight1">#DA3550</Color>
+    <Color x:Key="SystemAccentColorLight2">#E8677B</Color>
+    <Color x:Key="SystemAccentColorLight3">#F39AA7</Color>
+    <Color x:Key="SystemAccentColorDark1">#AA0D27</Color>
+    <Color x:Key="SystemAccentColorDark2">#8A0A1F</Color>
+    <Color x:Key="SystemAccentColorDark3">#690717</Color>
+
+    <!-- Card surface used on every page (sits on Mica). -->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
+</ResourceDictionary>

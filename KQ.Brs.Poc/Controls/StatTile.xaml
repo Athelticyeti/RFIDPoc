@@ -1,0 +1,30 @@
+<UserControl
+    x:Class="KQ.Brs.Poc.Controls.StatTile"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border Style="{StaticResource CardStyle}" Padding="16,14">
+        <Grid RowSpacing="6">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <FontIcon x:Name="Icon" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock x:Name="Caption" Grid.Column="1" Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            </Grid>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                <TextBlock x:Name="Value" Style="{StaticResource TitleLargeTextBlockStyle}" FontSize="34" />
+                <TextBlock x:Name="Sub" VerticalAlignment="Bottom" Margin="0,0,0,7" Style="{StaticResource BodyTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+            <ProgressBar x:Name="Bar" Grid.Row="2" Maximum="100" />
+        </Grid>
+    </Border>
+</UserControl>

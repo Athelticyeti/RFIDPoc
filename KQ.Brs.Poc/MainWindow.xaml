@@ -1,0 +1,93 @@
+<Window
+    x:Class="KQ.Brs.Poc.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:KQ.Brs.Poc.Controls"
+    Title="KQ Baggage Reconciliation POC">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="Base" />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="Root">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Custom title bar (drag region) -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Padding="16,0,140,0" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image Source="ms-appx:///Assets/KQ-256.png" Width="20" Height="20" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}">
+                <Run Text="Baggage Reconciliation" FontWeight="SemiBold" />
+                <Run Text="  ·  Proof of concept" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </TextBlock>
+            <TextBlock x:Name="FlightText" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Grid>
+
+        <NavigationView
+            x:Name="Nav"
+            Grid.Row="1"
+            PaneDisplayMode="Left"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="True"
+            OpenPaneLength="232"
+            SelectionChanged="Nav_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="DashboardItem" Content="Dashboard" Tag="Dashboard">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE80F;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Live map" Tag="Map">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE707;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Live reads" Tag="LiveReads">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE701;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Loading · Hold 2" Tag="Ramp">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE8EA;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="ExceptionsItem" Content="Exceptions" Tag="Exceptions">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE7BA;" /></NavigationViewItem.Icon>
+                    <NavigationViewItem.InfoBadge>
+                        <InfoBadge x:Name="ExceptionsBadge" Visibility="Collapsed" />
+                    </NavigationViewItem.InfoBadge>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Type B messages" Tag="Messages">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE715;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Reports" Tag="Reports">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE9D2;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.PaneFooter>
+                <controls:ReaderStatusPill x:Name="ReaderPill" Margin="12,4,12,8" />
+            </NavigationView.PaneFooter>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+
+        <!-- Toasts -->
+        <StackPanel x:Name="Toasts" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Width="420" Margin="0,0,24,24" Spacing="8" />
+
+        <!-- Full-window ramp alarm (FR-06): blocks the whole app until rescan or override -->
+        <controls:AlarmOverlay x:Name="Alarm" Grid.RowSpan="2" Visibility="Collapsed" />
+
+        <!-- Startup -->
+        <Grid x:Name="Loading" Grid.RowSpan="2" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+                <Image Source="ms-appx:///Assets/KQ-256.png" Width="72" Height="72" />
+                <ProgressRing IsActive="True" Width="32" Height="32" />
+                <TextBlock x:Name="LoadingText" Text="Loading KQ-504 manifest…" HorizontalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

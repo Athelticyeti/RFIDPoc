@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="RFIDPoc/RFIDPoc.csproj" />
+  <Project Path="KQ.Rfid.Alien/KQ.Rfid.Alien.csproj" />
+  <Project Path="KQ.Brs.Core/KQ.Brs.Core.csproj" />
+  <Project Path="KQ.Brs.Poc/KQ.Brs.Poc.csproj">
+    <Platform Solution="*|Any CPU" Project="x64" />
+  </Project>
+  <Project Path="KQ.Brs.Tests/KQ.Brs.Tests.csproj" />
+</Solution>
