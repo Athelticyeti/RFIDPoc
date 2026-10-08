@@ -158,9 +158,12 @@ public sealed class AlienAlr9900Reader : IRfidReader
         var sequence = await _commands.GetAsync("AntennaSequence", ct).ConfigureAwait(false);
         var progAntenna = await _commands.GetAsync("ProgAntenna", ct).ConfigureAwait(false);
         var session = await _commands.GetAsync("AcqG2Session", ct).ConfigureAwait(false);
+        var listFormat = await _commands.GetAsync("TagListFormat", ct).ConfigureAwait(false);
         try
         {
             if (wasStreaming) await _commands.SetAsync("AutoMode", "OFF", ct).ConfigureAwait(false);
+            // ReadFieldAsync parses the XML tag list; the reader keeps whatever format another tool last set.
+            await _commands.SetAsync("TagListFormat", "XML", ct).ConfigureAwait(false);
             await _commands.SetAsync("AntennaSequence", antenna.ToString(CultureInfo.InvariantCulture), ct).ConfigureAwait(false);
             // Tags the stream has just read stay quiet for a moment in session 1; session 0 makes every tag answer now.
             await _commands.SetAsync("AcqG2Session", "0", ct).ConfigureAwait(false);
@@ -199,6 +202,7 @@ public sealed class AlienAlr9900Reader : IRfidReader
             try { await _commands.SetAsync("AntennaSequence", sequence, CancellationToken.None).ConfigureAwait(false); } catch { }
             try { await _commands.SetAsync("ProgAntenna", progAntenna, CancellationToken.None).ConfigureAwait(false); } catch { }
             try { await _commands.SetAsync("AcqG2Session", session, CancellationToken.None).ConfigureAwait(false); } catch { }
+            try { await _commands.SetAsync("TagListFormat", listFormat, CancellationToken.None).ConfigureAwait(false); } catch { }
             if (wasStreaming)
             {
                 try { await _commands.SetAsync("AutoMode", "ON", CancellationToken.None).ConfigureAwait(false); } catch { }
