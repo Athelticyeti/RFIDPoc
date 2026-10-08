@@ -33,7 +33,13 @@ The flight starts **empty**. You add each passenger yourself and check in their 
    - Carry it through the **sorting tunnel**: the full-screen **DO NOT LOAD** alarm sounds and the app locks.
    - Click **Ready to rescan**, wait a moment, then present the tag at **antenna 3**. The alarm clears, and the audit trail records *"removed and re-routed to KQ412"*.
    - Alternatively, use **Supervisor override** (PIN `1234`, a reason is required).
-7. **Ticket problem.** Add a passenger with **Ticket valid** switched off. Their bag is refused at loading: **DO NOT LOAD – no authority to load**.
+7. **Ticket problem (FR-05).** Check that **Settings → Authority to load is Y (ticket valid)** is on. The check runs only at loading: check-in and the tunnel let the bag through, and the ramp stops it.
+   - Click **Add passenger** with **Ticket valid** switched off. In **Type B messages → Inbox**, the BSM's `.S/` line starts with `N`: the DCS saying "don't load".
+   - Write the tag and check it in at **antenna 0**. The bag turns **CheckedIn** with a **Held** badge (amber on the Live map).
+   - Carry it through the **sorting tunnel**. It is sorted as normal and a BPM is sent.
+   - With the loading antenna armed, present it at **antenna 3**. The full-screen **DO NOT LOAD – No authority to load (ticket not valid)** alarm sounds and the app locks.
+   - Clear it with **Supervisor override** (PIN `1234`, a reason is required). The bag's audit trail records the refused load and the reason.
+   - Alternatively, show an already-loaded bag losing its authority: load a valid passenger's bag, then on **Type B messages** apply a **CHG** for that plate with `.S/N/...`. The alarm fires, the bag must come off, and it is listed under bags to offload in the **Pre-pushback check**.
 8. **Passenger no-show (FR-10).** On **Type B messages**, click **Example: no-show CHG**, check the `.N/` line holds the loaded bag's plate, then **Apply**. The loaded bag must come off: the alarm fires. Rescan at antenna 3 to confirm the offload (a BUM is sent).
 9. **MQ outage.** Switch **IBM MQ link** off, scan a tag (the message shows as queued), then switch it back on. The queued messages are sent (at-least-once delivery).
 10. **Before pushback.** On the Dashboard, run **Pre-pushback check**. It lists bags checked in but not loaded, and bags to offload.
