@@ -7,7 +7,8 @@ public class TypeBTests
 {
     private static readonly FlightKey Kq504 = new("KQ", 504, new DateOnly(2026, 10, 2));
 
-    private const string Bsm = """
+    // Normalised to \n: with core.autocrlf the file (and so this literal) has \r\n, and the tests edit it by line.
+    private static readonly string Bsm = """
         BSM
         .V/1LNBO
         .F/KQ504/02OCT/EBB/Y
@@ -16,7 +17,7 @@ public class TypeBTests
         .S/Y/23A/C/012
         .P/1MWANGI/J
         ENDBSM
-        """;
+        """.ReplaceLineEndings("\n");
 
     [Fact]
     public void Parses_a_bsm_with_two_plates()
