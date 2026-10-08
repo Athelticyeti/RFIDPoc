@@ -49,6 +49,9 @@
                 <NavigationViewItem Content="Live reads" Tag="LiveReads">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE701;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Reader test" Tag="ReaderTest" ToolTipService.ToolTip="Diagnostics: which antenna sees which tag">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xEC05;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Loading · Hold 2" Tag="Ramp">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE8EA;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>

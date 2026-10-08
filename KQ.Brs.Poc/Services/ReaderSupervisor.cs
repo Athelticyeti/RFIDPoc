@@ -93,7 +93,9 @@ public sealed class ReaderSupervisor(ReadPipeline pipeline, ReconciliationEngine
             {
                 SetHealth(new(SupervisorState.Connecting, $"Connecting to {s.ReaderHost}…", Reconnects: _reconnects));
                 await reader.ConnectAsync(ct).ConfigureAwait(false);
-                await reader.ConfigureAsync(new ReaderProfile(), ct).ConfigureAwait(false);
+                // Always cycle all four antennas: a sequence left at one antenna (e.g. by an interrupted tag write or
+                // another tool) makes that antenna read every tag on the bench and the others go silent.
+                await reader.ConfigureAsync(new ReaderProfile { AntennaSequence = "0 1 2 3" }, ct).ConfigureAwait(false);
                 _reader = reader;
                 engine.LogReaderStatus("Online", reader.ReaderName);
                 pipelineTask = pipeline.RunAsync(reader, pipelineCts.Token);

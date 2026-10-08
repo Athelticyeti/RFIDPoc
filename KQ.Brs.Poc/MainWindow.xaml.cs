@@ -14,6 +14,7 @@ public sealed partial class MainWindow : Window
         ["Dashboard"] = typeof(DashboardPage),
         ["Map"] = typeof(MapPage),
         ["LiveReads"] = typeof(LiveReadsPage),
+        ["ReaderTest"] = typeof(ReaderTestPage),
         ["Ramp"] = typeof(RampPage),
         ["Exceptions"] = typeof(ExceptionsPage),
         ["Messages"] = typeof(MessagesPage),

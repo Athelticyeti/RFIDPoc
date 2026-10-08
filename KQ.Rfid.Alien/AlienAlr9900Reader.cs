@@ -130,6 +130,16 @@ public sealed class AlienAlr9900Reader : IRfidReader
 
     public Task<string> SendCommandAsync(string command, CancellationToken ct) => _commands.SendCommandAsync(command, ct);
 
+    /// <summary>The ALR-9900's largest RFAttenuation (15 dB below full power).</summary>
+    public const int MaxRfAttenuation = 150;
+
+    /// <summary>Transmit power reduction for all antennas together, in tenths of a dB (0 = full power).</summary>
+    public async Task<int> GetRfAttenuationAsync(CancellationToken ct) =>
+        int.Parse(await _commands.GetAsync("RFAttenuation", ct).ConfigureAwait(false), CultureInfo.InvariantCulture);
+
+    public Task SetRfAttenuationAsync(int tenthsDb, CancellationToken ct) =>
+        _commands.SetAsync("RFAttenuation", Math.Clamp(tenthsDb, 0, MaxRfAttenuation).ToString(CultureInfo.InvariantCulture), ct);
+
     /// <summary>
     /// Writes a new 96-bit EPC (24 hex characters) to the single tag in front of <paramref name="antenna"/>.
     /// Streaming is paused while it runs. It refuses unless exactly one tag is in that antenna's field, because the

@@ -49,6 +49,7 @@ The flight starts **empty**. You add each passenger yourself and check in their 
 
 - **Live map.** Open **Live map** on the projector during the walk: every bag is a dot in the place it really is (green right place, amber needs attention, red wrong place, hollow expected, blue offloaded). Antennas pulse while reading. Type a passenger in **Track a bag** (or click their dot) to light up their route and show each step with times.
 
+- **Reader test (diagnostics).** Shows the reader and its four antennas; every tag an antenna sees right now is a dot under it, and the list gives each tag's full EPC. It uses the raw reads (no RSSI filter), and POC scanning is paused while the page is open, so walking tags past the antennas doesn't check in, sort or load anything.
 - **Rescanning a tag that hasn't moved.** A tag held still in a field counts as one scan (3 s de-duplication). To rescan without moving it, use **Ready to rescan** or move the tag away briefly.
 - **The loading antenna starts disarmed.** This stops tags lying near antenna 3 from raising "unknown tag" alarms. **Manual scan** on the Loading page always works, even with no hardware.
 - **Data.** The audit trail is append-only, enforced by database triggers. Data lives in `%LocalAppData%\KQ.Brs.Poc` (SQLite `brs.db`, `settings.json`, `errors.log`).

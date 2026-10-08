@@ -48,6 +48,12 @@ public sealed class ReadPipeline(ReconciliationEngine engine, PersistenceWriter?
 
     public long FilteredReads => Interlocked.Read(ref _filtered);
 
+    /// <summary>Every raw read, before any POC filtering (the Reader test page). Raised on the pipeline task: keep handlers cheap.</summary>
+    public event Action<TagRead>? RawRead;
+
+    /// <summary>False while the Reader test page is open: raw reads still flow, but nothing reaches the engine.</summary>
+    public bool ProcessScans { get; set; } = true;
+
     /// <summary>Raised on the pipeline task if posting to the engine fails.</summary>
     public event Action<string>? Error;
 
@@ -70,6 +76,8 @@ public sealed class ReadPipeline(ReconciliationEngine engine, PersistenceWriter?
                 if (Antennas.TryGetValue(read.Antenna, out var stats)) stats.Add(read);
                 RecentReads.Enqueue(read);
                 while (RecentReads.Count > 2000) RecentReads.TryDequeue(out _);
+                RawRead?.Invoke(read);
+                if (!ProcessScans) continue;
 
                 var o = options();
                 var assignment = o.Antennas.FirstOrDefault(a => a.Antenna == read.Antenna);

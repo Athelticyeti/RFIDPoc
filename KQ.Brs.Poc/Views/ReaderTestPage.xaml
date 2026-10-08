@@ -1,0 +1,164 @@
+<Page
+    x:Class="KQ.Brs.Poc.Views.ReaderTestPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:KQ.Brs.Poc.ViewModels"
+    NavigationCacheMode="Required">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <Style x:Key="Pip" TargetType="Border">
+                <Setter Property="Width" Value="22" />
+                <Setter Property="Height" Value="22" />
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
+            </Style>
+            <Style x:Key="PipText" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid Padding="28,12,28,20" RowSpacing="12" ColumnSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="400" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.ColumnSpan="2" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Reader test" Style="{StaticResource PageTitleStyle}" />
+                <TextBlock x:Name="Subtitle" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+            <StackPanel x:Name="Legend" Grid.Column="1" Orientation="Horizontal" Spacing="18" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,4" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                <Button x:Name="ReaderButton" Click="ReaderButton_Click" Style="{StaticResource AccentButtonStyle}" Visibility="Collapsed" />
+                <Border x:Name="PowerCard" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="6" Padding="12,0,12,0"
+                        ToolTipService.ToolTip="Transmit power of all four antennas together (the reader's RFAttenuation). Lower it if a tag on one antenna shows up on the others.">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xEC05;" FontSize="14" VerticalAlignment="Center" />
+                        <TextBlock Text="Power" VerticalAlignment="Center" />
+                        <Slider x:Name="PowerSlider" Width="220" Minimum="0" Maximum="150" StepFrequency="10" TickPlacement="None"
+                                IsThumbToolTipEnabled="False" VerticalAlignment="Center" IsEnabled="False" ValueChanged="PowerSlider_ValueChanged" />
+                        <TextBlock x:Name="PowerText" Text="-" Width="96" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+                <Button Click="Clear_Click" ToolTipService.ToolTip="Forget every tag seen so far">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE894;" FontSize="14" />
+                        <TextBlock Text="Clear" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- The bench: four antennas cabled to the reader (1600 × 840 design units, scaled to fit) -->
+        <Border Grid.Row="1" CornerRadius="10" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Background="{ThemeResource MapGround}">
+            <Viewbox Stretch="Uniform" Margin="8">
+                <Canvas x:Name="Bench" Width="1600" Height="1140">
+                    <Canvas x:Name="GridLayer" />
+                    <Canvas x:Name="CableLayer" />
+                    <Canvas x:Name="StationLayer" />
+                    <Image Source="ms-appx:///Assets/reader.png" Canvas.Left="610" Canvas.Top="770" Width="380" />
+                    <Canvas x:Name="DotLayer" />
+                </Canvas>
+            </Viewbox>
+        </Border>
+
+        <!-- Tags -->
+        <Grid Grid.Row="1" Grid.Column="1" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border x:Name="DetailCard" Style="{StaticResource CardStyle}" Padding="16,12">
+                <StackPanel Spacing="8">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Tag ID (EPC)" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <Button x:Name="CopyButton" Grid.Column="1" Click="Copy_Click" IsEnabled="False" Padding="8,4" ToolTipService.ToolTip="Copy the EPC">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE8C8;" FontSize="12" />
+                                <TextBlock Text="Copy" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    <TextBlock x:Name="DetailEpc" Text="Pick a tag below" Style="{StaticResource MonoTextStyle}" FontSize="17" FontWeight="SemiBold"
+                               IsTextSelectionEnabled="True" TextWrapping="Wrap" />
+                    <StackPanel x:Name="DetailAntennas" Spacing="4" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="TagsTitle" Text="Tags seen · 0" Margin="16,12" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock x:Name="EmptyText" Grid.Row="1" Margin="16,0" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="No tags yet. Walk a tag past an antenna: it appears here and as a dot under that antenna." />
+                    <ListView x:Name="TagList" Grid.Row="1" SelectionMode="Single" SelectionChanged="TagList_SelectionChanged">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TagSightingViewModel">
+                                <Grid ColumnSpacing="10" Padding="0,6" RowSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Ellipse Width="10" Height="10" Fill="{ThemeResource StatusMatchedBrush}" VerticalAlignment="Center"
+                                             Opacity="{x:Bind vm:TagSightingViewModel.LiveOpacity(IsLive), Mode=OneWay}" ToolTipService.ToolTip="Being read now" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind Epc}" Style="{StaticResource MonoTextStyle}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind Ago, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                        <Border Style="{StaticResource Pip}" Background="{x:Bind vm:TagSightingViewModel.PipFill(A0), Mode=OneWay}" BorderBrush="{x:Bind vm:TagSightingViewModel.PipBorder(A0), Mode=OneWay}" BorderThickness="2">
+                                            <TextBlock Text="0" Style="{StaticResource PipText}" Foreground="{x:Bind vm:TagSightingViewModel.PipText(A0), Mode=OneWay}" />
+                                        </Border>
+                                        <Border Style="{StaticResource Pip}" Background="{x:Bind vm:TagSightingViewModel.PipFill(A1), Mode=OneWay}" BorderBrush="{x:Bind vm:TagSightingViewModel.PipBorder(A1), Mode=OneWay}" BorderThickness="2">
+                                            <TextBlock Text="1" Style="{StaticResource PipText}" Foreground="{x:Bind vm:TagSightingViewModel.PipText(A1), Mode=OneWay}" />
+                                        </Border>
+                                        <Border Style="{StaticResource Pip}" Background="{x:Bind vm:TagSightingViewModel.PipFill(A2), Mode=OneWay}" BorderBrush="{x:Bind vm:TagSightingViewModel.PipBorder(A2), Mode=OneWay}" BorderThickness="2">
+                                            <TextBlock Text="2" Style="{StaticResource PipText}" Foreground="{x:Bind vm:TagSightingViewModel.PipText(A2), Mode=OneWay}" />
+                                        </Border>
+                                        <Border Style="{StaticResource Pip}" Background="{x:Bind vm:TagSightingViewModel.PipFill(A3), Mode=OneWay}" BorderBrush="{x:Bind vm:TagSightingViewModel.PipBorder(A3), Mode=OneWay}" BorderThickness="2">
+                                            <TextBlock Text="3" Style="{StaticResource PipText}" Foreground="{x:Bind vm:TagSightingViewModel.PipText(A3), Mode=OneWay}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind Reads, Mode=OneWay}" /><Run Text=" reads · RSSI " /><Run Text="{x:Bind Rssi, Mode=OneWay}" />
+                                    </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
