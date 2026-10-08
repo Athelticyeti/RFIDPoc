@@ -48,6 +48,14 @@ public sealed class ReadPipeline(ReconciliationEngine engine, PersistenceWriter?
 
     public long FilteredReads => Interlocked.Read(ref _filtered);
 
+    // Per tag: the last read that passed the Min RSSI filter. Scans only start every few seconds for a tag that
+    // stays put (see ScanDeduplicator.MaxWindow), so this is what tells the map a tag is still there.
+    private readonly ConcurrentDictionary<string, DateTimeOffset> _lastRead = new();
+
+    /// <summary>True if the tag was read (above Min RSSI, on an enabled antenna) within the given time.</summary>
+    public bool IsBeingRead(string? epc, TimeSpan within) =>
+        epc != null && _lastRead.TryGetValue(epc, out var last) && DateTimeOffset.UtcNow - last < within;
+
     /// <summary>Every raw read, before any POC filtering (the Reader test page). Raised on the pipeline task: keep handlers cheap.</summary>
     public event Action<TagRead>? RawRead;
 
@@ -86,6 +94,7 @@ public sealed class ReadPipeline(ReconciliationEngine engine, PersistenceWriter?
                     Interlocked.Increment(ref _filtered);
                     continue;
                 }
+                _lastRead[read.Epc] = read.LastSeenUtc;
 
                 BagScan? scan;
                 lock (_lock)

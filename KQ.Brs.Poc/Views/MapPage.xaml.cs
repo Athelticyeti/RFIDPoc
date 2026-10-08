@@ -208,10 +208,14 @@ public sealed partial class MapPage : Page
         var now = DateTimeOffset.UtcNow;
         var bags = AppServices.State.Bags.ToList();
 
-        // Tags read in the last 10 s that belong to no bag: shown as "?" in the problem area of that scan point.
+        // Tags that belong to no bag, scanned in the last 10 s or still being read: shown as "?" in the problem area of
+        // that scan point. Judged on each tag's latest scan (the log is newest first), so a tag that has just been
+        // bound to a bag stops showing as unknown.
         var unknown = AppServices.State.ScanLog
-            .Where(s => s.Plate == "-" && s.Outcome == nameof(ScanOutcome.Unknown) && now - s.Utc < TimeSpan.FromSeconds(10))
-            .GroupBy(s => s.Epc).Select(g => g.First()).ToList();
+            .GroupBy(s => s.Epc).Select(g => g.First())
+            .Where(s => s.Plate == "-" && s.Outcome == nameof(ScanOutcome.Unknown)
+                        && (now - s.Utc < TimeSpan.FromSeconds(10) || AppServices.Pipeline.IsBeingRead(s.Epc, ReadNow)))
+            .ToList();
 
         // Rebuilding the dots replaces the element under the mouse, which swallows clicks and closes tooltips. So only
         // rebuild when something visible has changed (on the bench, tags lying at the antennas are read all the time).
@@ -253,13 +257,20 @@ public sealed partial class MapPage : Page
         foreach (var r in bags)
         {
             var b = r.Bag;
-            var recent = b.LastSeenUtc is { } seen && now - seen < TimeSpan.FromSeconds(3);
+            var recent = BeingRead(b, now);
             sb.Append(r.Plate).Append(Classify(b)).Append(recent ? '*' : '-').Append(r.StatusText).Append(b.Uld)
               .Append(b.OpenException).Append(r.Passenger).Append(b.LastSeenUtc?.Ticks).Append('|');
         }
         foreach (var u in unknown) sb.Append(u.Epc).Append(u.ScanPoint).Append(u.Detail).Append('|');
         return sb.ToString();
     }
+
+    // A tag lying at an antenna only starts a new scan every 15 s, so "being read" comes from the raw reads, not the
+    // scans: it holds while the reader keeps reading the tag and ends this long after it stops.
+    private static readonly TimeSpan ReadNow = TimeSpan.FromSeconds(3);
+
+    private static bool BeingRead(BagView b, DateTimeOffset now) =>
+        b.LastSeenUtc is { } seen && now - seen < ReadNow || AppServices.Pipeline.IsBeingRead(b.Epc, ReadNow);
 
     private static Region RegionForUnknown(string scanPoint) => scanPoint switch
     {
@@ -340,7 +351,7 @@ public sealed partial class MapPage : Page
         DotLayer.Children.Add(target);
 
         // Being read right now: a pulsing halo.
-        if (row.Bag.LastSeenUtc is { } seen && now - seen < TimeSpan.FromSeconds(3) && !dimmed)
+        if (BeingRead(row.Bag, now) && !dimmed)
         {
             var halo = new Ellipse
             {
