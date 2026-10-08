@@ -287,7 +287,7 @@ public sealed class PrePushbackDialog : ContentDialog
             IsOpen = true, IsClosable = false,
             Severity = ok ? InfoBarSeverity.Success : InfoBarSeverity.Warning,
             Title = ok ? "Clear for pushback" : "Not clear for pushback",
-            Message = $"{report.CheckedInNotLoaded.Count} checked in but not loaded · {report.OffloadRequired.Count} to offload · {report.NeverCheckedIn} never checked in",
+            Message = $"{report.Loaded} of {report.Total} bag(s) loaded · {report.CheckedInNotLoaded.Count} checked in but not loaded · {report.OffloadRequired.Count} to offload · {report.NeverCheckedIn} never checked in",
         });
         panel.Children.Add(Section("Checked in, not loaded", report.CheckedInNotLoaded));
         panel.Children.Add(Section("Offload required (passenger not flying)", report.OffloadRequired));

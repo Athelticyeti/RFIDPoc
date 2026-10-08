@@ -326,7 +326,9 @@ public sealed partial class ReconciliationEngine
             notLoaded.Select(b => BagView.From(b, OpenExceptionFor(b.Plate.Value))).ToList(),
             ours.Count(b => b.Status == BagStatus.Expected),
             offload.Select(b => BagView.From(b, OpenExceptionFor(b.Plate.Value))).ToList(),
-            raised);
+            raised,
+            ours.Count(b => b.Status == BagStatus.Loaded),
+            ours.Count);
     });
 
     private static string Short(string epc) => epc.Length > 8 ? "…" + epc[^8..] : epc;

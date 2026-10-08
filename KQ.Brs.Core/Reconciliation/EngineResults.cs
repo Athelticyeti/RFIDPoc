@@ -13,4 +13,5 @@ public sealed record EngineSnapshot(
 
 /// <summary>FR-10 before-pushback check.</summary>
 public sealed record PrePushbackReport(
-    IReadOnlyList<BagView> CheckedInNotLoaded, int NeverCheckedIn, IReadOnlyList<BagView> OffloadRequired, int ExceptionsRaised);
+    IReadOnlyList<BagView> CheckedInNotLoaded, int NeverCheckedIn, IReadOnlyList<BagView> OffloadRequired, int ExceptionsRaised,
+    int Loaded, int Total);
