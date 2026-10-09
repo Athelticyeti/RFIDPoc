@@ -38,7 +38,7 @@ public sealed class BagDetailDialog : ContentDialog
 
         // Real-tag bags on KQ-504 can have their licence plate written onto a physical tag (FR-02, spec 3.4.2).
         var canWrite = row.IsReal && bag.Flight == "KQ504" && !bag.Deleted;
-        if (canWrite) dialog.SecondaryButtonText = bag.Epc != null && LicencePlateCodec.TryDecode(bag.Epc, out _) ? "Rewrite plate to tag" : "Write plate to tag";
+        if (canWrite) dialog.SecondaryButtonText = bag.Epc != null && LicencePlateCodec.TryDecode(bag.Epc, out _) ? "Replace bag tag (write plate to a new tag)" : "Write plate to tag";
 
         var panel = new StackPanel { Spacing = 14, MinWidth = 620 };
         panel.Children.Add(Facts(
