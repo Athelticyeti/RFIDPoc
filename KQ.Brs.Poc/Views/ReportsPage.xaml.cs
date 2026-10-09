@@ -27,7 +27,8 @@ public sealed partial class ReportsPage : Page
         try
         {
             await AppServices.Writer.FlushAsync();
-            _report = await Task.Run(() => EvaluationReportBuilder.Build(AppServices.Store));
+            var baseline = AppServices.Settings.TurnaroundBaseline;
+            _report = await Task.Run(() => EvaluationReportBuilder.Build(AppServices.Store, baseline));
             Render(_report);
         }
         catch (Exception ex)
@@ -45,13 +46,15 @@ public sealed partial class ReportsPage : Page
         Body.Children.Clear();
         Generated.Text = $"Generated {r.GeneratedUtc.ToLocalTime():HH:mm:ss} from the audit trail. Target read rate > 99 % at every fixed scan point.";
 
+        var sim = AppServices.Settings.SimulatorOn;
+
         // Summary tiles
         var tiles = new Grid { ColumnSpacing = 12 };
         string throughput = r.BagsPerMinute is { } bpm ? $"{bpm:F1}" : "-";
         var summary = new (string Caption, string Value, string Sub)[]
         {
-            ("Bags loaded", r.Loaded.ToString("N0"), "real and virtual"),
-            ("Throughput", throughput, "bags / min, first check-in to last load (simulator time runs faster)"),
+            ("Bags loaded", r.Loaded.ToString("N0"), sim ? "real and virtual" : "real tags"),
+            ("Throughput", throughput, sim ? "bags / min, first check-in to last load (simulator time runs faster)" : "bags / min, first check-in to last load"),
             ("Exceptions raised", r.Exceptions.Sum(e => e.Raised).ToString("N0"), $"{r.Exceptions.Sum(e => e.Open)} still open"),
             ("Reader went offline", r.ReaderOfflineEvents.ToString("N0"), "times (auto-reconnect)"),
         };
@@ -76,7 +79,7 @@ public sealed partial class ReportsPage : Page
         // Read rate per scan point
         var rates = new StackPanel { Spacing = 10 };
         rates.Children.Add(Header("Read rate per scan point", "A miss = the bag was seen at a later point but not here."));
-        if (r.ScanPoints.Count == 0) rates.Children.Add(Caption("No scans yet. Start the virtual bags or present real tags."));
+        if (r.ScanPoints.Count == 0) rates.Children.Add(Caption(sim ? "No scans yet. Start the virtual bags or present real tags." : "No scans yet. Present real tags at the antennas."));
         foreach (var p in r.ScanPoints)
             rates.Children.Add(RateRow($"{ScanPoint.Get(p.ScanPoint).Name} · {(p.Real ? "real tags" : "virtual")}", p.Rate, $"{p.Read} read, {p.Missed} missed", p.Real));
         Body.Children.Add(Card(rates));
@@ -95,6 +98,8 @@ public sealed partial class ReportsPage : Page
             r.Exceptions.Select(e => new[] { e.Type.ToString(), $"{e.Raised}", $"{e.Open}", $"{e.Overridden}", Fmt(e.MedianResolve), Fmt(e.MaxResolve) })));
         Body.Children.Add(Card(exceptions));
 
+        Body.Children.Add(Card(TurnaroundSection(r)));
+
         if (r.MissedAtBelt.Count > 0)
         {
             var missed = new StackPanel { Spacing = 4 };
@@ -102,6 +107,56 @@ public sealed partial class ReportsPage : Page
             missed.Children.Add(new TextBlock { Text = string.Join("   ", r.MissedAtBelt), FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Mono, Consolas"), TextWrapping = TextWrapping.Wrap });
             Body.Children.Add(Card(missed));
         }
+    }
+
+    /// <summary>Spec 9.1: the baseline flight (entered here, saved in settings) against the POC's real-tag loading pace.</summary>
+    private StackPanel TurnaroundSection(EvaluationReport r)
+    {
+        var t = r.Turnaround;
+        var panel = new StackPanel { Spacing = 10 };
+        panel.Children.Add(Header("Turnaround vs baseline flight",
+            "Spec 9.1: the handheld workflow must not extend turnaround. Enter a comparable flight loaded without RFID, timed from the first bag into the hold to the last." + (AppServices.Settings.SimulatorOn ? " Only real-tag loads count here: the simulator runs faster than real time." : "")));
+
+        var b = t.Baseline;
+        var flight = new TextBox { Header = "Baseline flight", PlaceholderText = "e.g. KQ-504 on 25 Sep", Text = b?.Flight ?? "", MinWidth = 220 };
+        var bags = new NumberBox { Header = "Bags loaded", Minimum = 2, Maximum = 2000, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact, Value = b?.Bags ?? double.NaN, MinWidth = 140 };
+        var minutes = new NumberBox { Header = "Loading time (min)", Minimum = 1, Maximum = 600, SmallChange = 1, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact, Value = b?.LoadingMinutes ?? double.NaN, MinWidth = 140 };
+        var save = new Button { Content = "Save baseline", VerticalAlignment = VerticalAlignment.Bottom };
+        save.Click += async (_, _) =>
+        {
+            if (double.IsNaN(bags.Value) || double.IsNaN(minutes.Value) || bags.Value < 2 || minutes.Value <= 0)
+            {
+                AppServices.State.ShowToast("Baseline", "Enter at least 2 bags and a loading time in minutes.", isError: true);
+                return;
+            }
+            var name = string.IsNullOrWhiteSpace(flight.Text) ? "Baseline flight" : flight.Text.Trim();
+            AppServices.ApplySettings(AppServices.Settings with { TurnaroundBaseline = new TurnaroundBaseline(name, (int)bags.Value, minutes.Value) });
+            await LoadAsync();
+        };
+        var inputs = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, Children = { flight, bags, minutes, save } };
+        if (b != null)
+        {
+            var clear = new Button { Content = "Clear", VerticalAlignment = VerticalAlignment.Bottom };
+            clear.Click += async (_, _) =>
+            {
+                AppServices.ApplySettings(AppServices.Settings with { TurnaroundBaseline = null });
+                await LoadAsync();
+            };
+            inputs.Children.Add(clear);
+        }
+        panel.Children.Add(inputs);
+
+        static string Secs(double? s) => s is { } v ? $"{v:F1} s" : "-";
+        var rows = new List<string[]>();
+        if (b != null) rows.Add([$"Baseline: {b.Flight} (no RFID)", $"{b.Bags:N0}", Fmt(TimeSpan.FromMinutes(b.LoadingMinutes)), Secs(b.SecondsPerBag)]);
+        rows.Add(["This POC (real tags)", $"{t.Loaded:N0}", Fmt(t.LoadingTime), Secs(t.SecondsPerBag)]);
+        panel.Children.Add(Table(["Flight", "Bags loaded", "Loading time", "Time per bag"], rows));
+
+        var verdict = Caption(r.TurnaroundVerdict());
+        verdict.Style = (Style)Application.Current.Resources["BodyStrongTextBlockStyle"];
+        verdict.Foreground = Ui.Resource(t.Extended switch { true => "StatusExceptionBrush", false => "StatusMatchedBrush", _ => "TextFillColorSecondaryBrush" });
+        panel.Children.Add(verdict);
+        return panel;
     }
 
     private static string Fmt(TimeSpan? t) => t is { } v ? Ui.Duration(v) : "-";

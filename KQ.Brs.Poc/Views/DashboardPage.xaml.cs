@@ -65,7 +65,7 @@ public sealed partial class DashboardPage : Page
     private void RenderSim()
     {
         // The virtual-bags simulator only matters for the generated 700-bag flight; hide it for real-tag demos.
-        var demoBags = AppServices.Settings.GenerateDemoBags;
+        var demoBags = AppServices.Settings.SimulatorOn;
         SimButton.Visibility = SpeedBox.Visibility = SimStatusText.Visibility = demoBags ? Visibility.Visible : Visibility.Collapsed;
         RealTagsFilter.Visibility = demoBags ? Visibility.Visible : Visibility.Collapsed;
         if (!demoBags && FilterBar.SelectedItem == RealTagsFilter) FilterBar.SelectedItem = FilterBar.Items[0];

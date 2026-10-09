@@ -16,7 +16,38 @@ public sealed record AntennaRate(int Antenna, bool Real, int Windows, int Reads,
 
 public sealed record ExceptionStats(ExceptionType Type, int Raised, int Open, int Overridden, TimeSpan? MedianResolve, TimeSpan? MaxResolve);
 
-/// <summary>Evaluation report (FR-13): read rates, missed reads, exceptions and time to resolve, throughput.</summary>
+/// <summary>
+/// A comparable flight loaded without RFID, entered by hand (spec 9.1: turnaround not extended compared with a baseline
+/// flight). Loading time runs from the first bag into the hold to the last.
+/// </summary>
+public sealed record TurnaroundBaseline(string Flight, int Bags, double LoadingMinutes)
+{
+    /// <summary>Average time between one bag being loaded and the next.</summary>
+    public double? SecondsPerBag => Bags >= 2 && LoadingMinutes > 0 ? LoadingMinutes * 60 / (Bags - 1) : null;
+}
+
+/// <summary>
+/// Turnaround impact (FR-13): the POC's loading pace with real tags against the baseline flight. Only real-tag loads
+/// count, because the simulator runs faster than real time.
+/// </summary>
+public sealed record TurnaroundComparison(TurnaroundBaseline? Baseline, int Loaded, DateTimeOffset? FirstLoad, DateTimeOffset? LastLoad)
+{
+    public TimeSpan? LoadingTime => FirstLoad is { } a && LastLoad is { } b ? b - a : null;
+
+    /// <summary>Average time between one bag being loaded and the next (needs at least two loads).</summary>
+    public double? SecondsPerBag => Loaded >= 2 && LoadingTime is { TotalSeconds: > 0 } t ? t.TotalSeconds / (Loaded - 1) : null;
+
+    /// <summary>Positive: the POC loads each bag this much slower than the baseline.</summary>
+    public double? DeltaSecondsPerBag => SecondsPerBag is { } poc && Baseline?.SecondsPerBag is { } baseline ? poc - baseline : null;
+
+    /// <summary>The difference scaled to the baseline flight: how much longer (positive) or shorter loading it would take.</summary>
+    public TimeSpan? ProjectedImpact => DeltaSecondsPerBag is { } d && Baseline is { } b ? TimeSpan.FromSeconds(d * (b.Bags - 1)) : null;
+
+    /// <summary>The verdict for spec 9.1, or null while there's nothing to compare.</summary>
+    public bool? Extended => DeltaSecondsPerBag is { } d ? d > 0 : null;
+}
+
+/// <summary>Evaluation report (FR-13): read rates, missed reads, exceptions and time to resolve, throughput, turnaround.</summary>
 public sealed record EvaluationReport(
     DateTimeOffset GeneratedUtc,
     IReadOnlyList<ScanPointRate> ScanPoints,
@@ -27,7 +58,8 @@ public sealed record EvaluationReport(
     DateTimeOffset? FirstCheckIn,
     DateTimeOffset? LastLoad,
     int ReaderOfflineEvents,
-    int ReaderOnlineEvents)
+    int ReaderOnlineEvents,
+    TurnaroundComparison Turnaround)
 {
     public double? BagsPerMinute => FirstCheckIn is { } a && LastLoad is { } b && b > a ? Loaded / (b - a).TotalMinutes : null;
 
@@ -57,6 +89,18 @@ public sealed record EvaluationReport(
         sb.AppendLine();
         sb.AppendLine(CultureInfo.InvariantCulture, $"Loaded: {Loaded}. Throughput: {(BagsPerMinute is { } r ? r.ToString("F1", CultureInfo.InvariantCulture) + " bags/min" : "n/a")}.");
         sb.AppendLine(CultureInfo.InvariantCulture, $"Reader went offline {ReaderOfflineEvents} time(s).");
+        sb.AppendLine();
+        sb.AppendLine("## Turnaround vs baseline flight");
+        var t = Turnaround;
+        if (t.Baseline is { } b)
+        {
+            sb.AppendLine("| Flight | Bags loaded | Loading time | Time per bag |");
+            sb.AppendLine("|---|---|---|---|");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"| Baseline: {b.Flight} (no RFID) | {b.Bags} | {Fmt(TimeSpan.FromMinutes(b.LoadingMinutes))} | {Secs(b.SecondsPerBag)} |");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"| This POC (real tags) | {t.Loaded} | {Fmt(t.LoadingTime)} | {Secs(t.SecondsPerBag)} |");
+            sb.AppendLine();
+        }
+        sb.AppendLine(TurnaroundVerdict());
         if (MissedAtBelt.Count > 0)
         {
             sb.AppendLine();
@@ -77,8 +121,29 @@ public sealed record EvaluationReport(
             sb.AppendLine(CultureInfo.InvariantCulture, $"exception,{e.Type},all,{e.Raised},{e.Open},{e.MedianResolve?.TotalSeconds:F0}");
         foreach (var p in MissedAtBelt)
             sb.AppendLine(CultureInfo.InvariantCulture, $"missed,{p},belt,,,");
+        var t = Turnaround;
+        if (t.Baseline is { } b)
+            sb.AppendLine(CultureInfo.InvariantCulture, $"turnaround,baseline,{Csv(b.Flight)},{b.Bags},{b.LoadingMinutes * 60:F0},{b.SecondsPerBag:F1}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"turnaround,poc,real,{t.Loaded},{t.LoadingTime?.TotalSeconds:F0},{t.SecondsPerBag:F1}");
         return sb.ToString();
     }
+
+    /// <summary>One line on spec 9.1 (turnaround not extended), or what is still needed to judge it.</summary>
+    public string TurnaroundVerdict()
+    {
+        var t = Turnaround;
+        if (t.Baseline?.SecondsPerBag == null) return "No baseline flight entered yet: add one to compare turnaround (spec 9.1).";
+        if (t.SecondsPerBag == null) return "Load at least two bags with real tags to compare against the baseline.";
+        var delta = t.DeltaSecondsPerBag!.Value;
+        var impact = t.ProjectedImpact!.Value;
+        return t.Extended == true
+            ? $"Turnaround extended: {delta.ToString("F1", CultureInfo.InvariantCulture)} s slower per bag, about {Fmt(impact)} longer to load {t.Baseline.Bags} bags."
+            : $"Turnaround not extended: {(-delta).ToString("F1", CultureInfo.InvariantCulture)} s faster per bag, about {Fmt(-impact)} shorter to load {t.Baseline.Bags} bags.";
+    }
+
+    private static string Secs(double? s) => s is { } v ? v.ToString("F1", CultureInfo.InvariantCulture) + " s" : "-";
+
+    private static string Csv(string s) => s.Contains(',') || s.Contains('"') ? "\"" + s.Replace("\"", "\"\"") + "\"" : s;
 
     private static string Fmt(TimeSpan? t) => t is { } v ? (v.TotalMinutes >= 1 ? $"{v.TotalMinutes:F1} min" : $"{v.TotalSeconds:F0} s") : "-";
 }
@@ -86,7 +151,7 @@ public sealed record EvaluationReport(
 public static class EvaluationReportBuilder
 {
     /// <summary>Builds the report from the database (read-only; safe to run on a background thread).</summary>
-    public static EvaluationReport Build(BrsStore store)
+    public static EvaluationReport Build(BrsStore store, TurnaroundBaseline? baseline = null)
     {
         using var c = store.Open();
 
@@ -95,6 +160,7 @@ public static class EvaluationReportBuilder
         var loaded = new HashSet<string>();
         var sourceOf = new Dictionary<string, bool>(); // plate → real
         DateTimeOffset? firstCheckIn = null, lastLoad = null;
+        var realLoads = new Dictionary<string, DateTimeOffset>();   // plate → its first load with a real tag (turnaround)
         BrsStore.Query(c, "SELECT plate, kind, scan_point, reader_id, occurred_utc FROM bag_events WHERE scan_point IS NOT NULL", r =>
         {
             var plate = r.GetString(0);
@@ -106,6 +172,7 @@ public static class EvaluationReportBuilder
             if (!seen.TryGetValue(key, out var set)) seen[key] = set = new();
             set.Add(plate);
             if (kind == "Loaded") { loaded.Add(plate); if (lastLoad == null || t > lastLoad) lastLoad = t; }
+            if (kind == "Loaded" && real && (!realLoads.TryGetValue(plate, out var at) || t < at)) realLoads[plate] = t;
             if (kind is "DeskBind" or "DeskCheck" && (firstCheckIn == null || t < firstCheckIn)) firstCheckIn = t;
         });
 
@@ -166,7 +233,9 @@ public static class EvaluationReportBuilder
                 return new ExceptionStats(g.Key, g.Count(), g.Count(e => e.State == ExceptionState.Open), g.Count(e => e.Overridden),
                     took.Count == 0 ? null : took[took.Count / 2], took.Count == 0 ? null : took[^1]);
             }).ToList(),
-            loaded.Count, firstCheckIn, lastLoad, offline, online);
+            loaded.Count, firstCheckIn, lastLoad, offline, online,
+            new TurnaroundComparison(baseline, realLoads.Count,
+                realLoads.Count == 0 ? null : realLoads.Values.Min(), realLoads.Count == 0 ? null : realLoads.Values.Max()));
     }
 
     private static double? Max(double? a, double? b) => a == null ? b : b == null ? a : Math.Max(a.Value, b.Value);

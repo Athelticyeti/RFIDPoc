@@ -48,6 +48,7 @@ The flight starts **empty**. You add each passenger yourself and check in their 
     - Click **Raise NotLoaded exceptions**. A toast confirms how many were raised, and each bag gets a **NotLoaded** exception.
     - **Bag to offload:** a loaded bag whose passenger isn't flying (step 8) or whose ticket is no longer valid (step 7, CHG with `.S/N/...`) is listed under **Offload required** until it is rescanned off at antenna 3.
 11. **Evaluation.** Open **Reports**: read rate per scan point and antenna, exceptions and time to resolve. Use **Export** to save Markdown or CSV.
+    - **Turnaround (spec 9.1).** Under **Turnaround vs baseline flight**, enter a comparable flight loaded without RFID (bags loaded, minutes from the first bag into the hold to the last) and click **Save baseline**. The report compares the time per bag with the POC's real-tag loads (at least two), and says whether turnaround was extended and by how much for a flight that size. Simulated bags don't count, because the simulator runs faster than real time.
 
 ## Good to know
 

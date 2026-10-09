@@ -63,7 +63,7 @@ public static class AppServices
     {
         var stored = await Task.Run(Store.Load);
         // An empty flight unless demo bags are switched on: passengers are then added one by one from the Dashboard.
-        await Engine.InitialiseAsync(stored, () => Settings.GenerateDemoBags
+        await Engine.InitialiseAsync(stored, () => Settings.SimulatorOn
             ? ManifestGenerator.Generate(Settings.Brs, Engine.Flight, Settings.Brs.Simulator.Seed)
             : []);
         await State.LoadAsync(Engine.SnapshotAsync);

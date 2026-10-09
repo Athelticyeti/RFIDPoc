@@ -26,8 +26,8 @@ public sealed partial class RampPage : Page
     {
         var state = AppServices.State;
         // The real/virtual filter only matters when the simulator has virtual bags.
-        RealOnly.Visibility = AppServices.Settings.GenerateDemoBags ? Visibility.Visible : Visibility.Collapsed;
-        if (!AppServices.Settings.GenerateDemoBags) RealOnly.IsOn = false;
+        RealOnly.Visibility = AppServices.Settings.SimulatorOn ? Visibility.Visible : Visibility.Collapsed;
+        if (!AppServices.Settings.SimulatorOn) RealOnly.IsOn = false;
         if (!_subscribed)
         {
             _subscribed = true;

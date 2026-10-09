@@ -26,6 +26,12 @@ public sealed record AppSettings
     /// <summary>Off (default): the flight starts empty and you add each passenger yourself. On: 700 generated demo bags.</summary>
     public bool GenerateDemoBags { get; init; }
 
+    /// <summary>Off (default): real reader and real tags only; the simulator's settings and controls are hidden.</summary>
+    public bool ShowSimulator { get; init; }
+
+    /// <summary>Virtual bags in use: the simulator is shown and the 700 demo bags are switched on.</summary>
+    [JsonIgnore] public bool SimulatorOn => ShowSimulator && GenerateDemoBags;
+
     /// <summary>Pop up a "Tag not linked" alert when a tag nobody is waiting for is held at check-in.</summary>
     public bool ShowUnlinkedTagAlerts { get; init; } = true;
 
@@ -37,6 +43,9 @@ public sealed record AppSettings
 
     /// <summary>Highest licence-plate serial issued so far. Kept outside the database so plates never repeat after a clean.</summary>
     public int LastPlateSerial { get; init; }
+
+    /// <summary>A flight loaded without RFID, entered on the Reports page, for the turnaround comparison (spec 9.1).</summary>
+    public KQ.Brs.Core.Reports.TurnaroundBaseline? TurnaroundBaseline { get; init; }
 
     public BrsOptions Brs { get; init; } = new();
 }

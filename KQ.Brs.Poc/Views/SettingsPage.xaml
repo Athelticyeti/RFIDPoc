@@ -78,6 +78,11 @@
                 </tk:SettingsCard>
 
                 <TextBlock Text="Simulator" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,4" />
+                <tk:SettingsCard Header="Show simulator" Description="Off: the app uses only the real reader and real tags, and hides the virtual-bags simulator. On: shows its settings, the 700 demo bags option and the start button on the Dashboard.">
+                    <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7F4;" /></tk:SettingsCard.HeaderIcon>
+                    <ToggleSwitch x:Name="SimulatorToggle" Toggled="SimulatorToggle_Toggled" />
+                </tk:SettingsCard>
+                <StackPanel x:Name="SimulatorPanel" Spacing="4">
                 <tk:SettingsExpander Header="Virtual bags" Description="The bags not reserved for real tags travel Desk 14 → Belt 04 → Ramp on a virtual clock." IsExpanded="True">
                     <tk:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE7F4;" /></tk:SettingsExpander.HeaderIcon>
                     <tk:SettingsExpander.Items>
@@ -92,12 +97,13 @@
                         <tk:SettingsCard Header="Random seed" Description="Same seed, same run."><NumberBox x:Name="SeedBox" Minimum="0" Maximum="999999" SpinButtonPlacementMode="Compact" MinWidth="140" /></tk:SettingsCard>
                     </tk:SettingsExpander.Items>
                 </tk:SettingsExpander>
-
-                <TextBlock Text="Demo" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,4" />
                 <tk:SettingsCard Header="Generate 700 demo bags" Description="Off: the flight starts empty and you add each passenger from the Dashboard. On: a generated KQ-504 manifest for the virtual-bags simulator. Takes effect after Clean database.">
                     <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7F4;" /></tk:SettingsCard.HeaderIcon>
                     <ToggleSwitch x:Name="DemoBagsToggle" />
                 </tk:SettingsCard>
+                </StackPanel>
+
+                <TextBlock Text="Demo" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,4" />
                 <tk:SettingsCard Header="Show misroute demo (Flag tag as KQ-412)" Description="Adds a button to bag details that turns a tag into a bag for another flight, so you can show the wrong-flight alarm (spec 7.2). Undo is always available on a flagged bag.">
                     <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7BA;" /></tk:SettingsCard.HeaderIcon>
                     <ToggleSwitch x:Name="MisrouteToggle" />

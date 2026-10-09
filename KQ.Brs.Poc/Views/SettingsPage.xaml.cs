@@ -52,6 +52,8 @@ public sealed partial class SettingsPage : Page
             _antennas[i].MinRssi.Value = a.MinRssi;
         }
         for (var i = 0; i < 4; i++) _cards[i].Description = Ui.AntennaName(s.Brs, i);
+        SimulatorToggle.IsOn = s.ShowSimulator;
+        SimulatorPanel.Visibility = s.ShowSimulator ? Visibility.Visible : Visibility.Collapsed;
         DemoBagsToggle.IsOn = s.GenerateDemoBags;
         UnlinkedAlertsToggle.IsOn = s.ShowUnlinkedTagAlerts;
         MisrouteToggle.IsOn = s.ShowMisrouteDemo;
@@ -98,6 +100,7 @@ public sealed partial class SettingsPage : Page
             AutoConnect = AutoConnectToggle.IsOn,
             SupervisorPin = PinBox.Password.Length > 0 ? PinBox.Password : old.SupervisorPin,
             Theme = (AppTheme)Math.Max(0, ThemeBox.SelectedIndex),
+            ShowSimulator = SimulatorToggle.IsOn,
             GenerateDemoBags = DemoBagsToggle.IsOn,
             ShowUnlinkedTagAlerts = UnlinkedAlertsToggle.IsOn,
             ShowMisrouteDemo = MisrouteToggle.IsOn,
@@ -128,6 +131,9 @@ public sealed partial class SettingsPage : Page
         AppServices.ApplySettings(settings);
         SavedText.Text = $"Saved {DateTime.Now:HH:mm:ss}";
 
+        // Hiding the simulator also stops it, so no virtual bags move in a real-reader demo.
+        if (!settings.ShowSimulator && AppServices.Simulator.IsRunning) AppServices.Simulator.Pause();
+
         if (settings.ArmLoadingOnStart && !old.ArmLoadingOnStart)
         {
             // Arm it now as well, and re-check any tag already lying at the loading antenna.
@@ -143,6 +149,9 @@ public sealed partial class SettingsPage : Page
             SavedText.Text += " · reconnecting to the reader";
         }
     }
+
+    private void SimulatorToggle_Toggled(object sender, RoutedEventArgs e) =>
+        SimulatorPanel.Visibility = SimulatorToggle.IsOn ? Visibility.Visible : Visibility.Collapsed;
 
     /// <summary>Fills in the calibrated boardroom set-up (BrsOptions.PocDemoAntennas) and saves it.</summary>
     private void PocDefaults_Click(object sender, RoutedEventArgs e)
@@ -204,10 +213,10 @@ public sealed partial class SettingsPage : Page
         understood.Unchecked += (_, _) => dialog.IsPrimaryButtonEnabled = false;
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
 
-        if (DemoBagsToggle.IsOn != AppServices.Settings.GenerateDemoBags)
-            AppServices.ApplySettings(AppServices.Settings with { GenerateDemoBags = DemoBagsToggle.IsOn });
+        if (DemoBagsToggle.IsOn != AppServices.Settings.GenerateDemoBags || SimulatorToggle.IsOn != AppServices.Settings.ShowSimulator)
+            AppServices.ApplySettings(AppServices.Settings with { GenerateDemoBags = DemoBagsToggle.IsOn, ShowSimulator = SimulatorToggle.IsOn });
         await AppServices.ResetDemoAsync(keepBindings: false);
-        AppServices.State.ShowToast("Database cleaned", AppServices.Settings.GenerateDemoBags
+        AppServices.State.ShowToast("Database cleaned", AppServices.Settings.SimulatorOn
             ? "Fresh KQ-504 flight with 700 demo bags."
             : "Empty KQ-504 flight. Add passengers from the Dashboard.");
     }
