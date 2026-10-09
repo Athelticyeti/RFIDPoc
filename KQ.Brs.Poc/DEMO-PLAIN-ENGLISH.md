@@ -44,6 +44,26 @@ A bag for the wrong flight is caught in the tunnel; the final load check is at t
 
 Hold **one tag at a time**, close to the antenna you mean. Keep the other tags in the metal tin, or the antennas will read them too.
 
+## Reading the Dashboard
+
+Each bag is one row. Two columns tell you where it is and whether it's OK.
+
+**CHECK-IN · SORT · LOAD:** three dots that fill in as the bag passes the check-in desk, the sorting tunnel and the loading point. Three filled dots = the bag is on the plane.
+
+**STATUS:** one badge that sums up the bag right now.
+
+| Badge | What it means |
+| --- | --- |
+| EXPECTED | The airline has told us about the bag (its BSM arrived), but no antenna has read its tag yet. |
+| IN SCAN | An antenna is reading the tag right now. It changes back after about 3 seconds. |
+| MATCHED | All good: the tag has been read and the bag is where it should be. The dots show how far it has got. |
+| HELD | The bag is checked in, but its passenger's ticket isn't valid or they haven't boarded. It mustn't be loaded. |
+| EXCEPTION | Something is wrong and needs dealing with, e.g. a bag for the wrong flight or one that was refused at loading. It's listed on the **Exceptions** page. |
+| MISSING | The bag skipped a step: it reached the loading point without being read in the sorting tunnel, or the pre-pushback check found it checked in but not loaded. |
+| OFFLOADED | The bag was taken off the flight, because the passenger didn't board or their booking was cancelled. |
+
+The steps below say a bag "turns CheckedIn", "Sorted" or "Loaded". On the Dashboard you'll see that as the dots filling in, with the badge showing **MATCHED**. Click a bag to see those words in its details.
+
 ## Before you start
 
 Allow 10 minutes before the audience arrives.

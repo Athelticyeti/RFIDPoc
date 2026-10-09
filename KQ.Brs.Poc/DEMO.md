@@ -13,6 +13,20 @@ You can change the mapping in **Settings → Antenna → scan point**.
 
 The flight starts **empty**. You add each passenger yourself and check in their bag with a real tag. To simulate a full 700-bag flight instead, switch on **Settings → Generate 700 demo bags** and reset the demo.
 
+## Dashboard statuses
+
+Each row's **CHECK-IN · SORT · LOAD** dots fill as the bag reaches `CheckedIn`, `Sorted` and `Loaded` (the bag statuses used below and in bag details). The **STATUS** badge sums the bag up; the first rule that applies wins:
+
+| Badge | When |
+|---|---|
+| MISSING | Open `MissingAtSorter` (reached the ramp without a Belt 04 read) or `NotLoaded` (raised by the pre-pushback check) exception. |
+| EXCEPTION | Any other open exception: WrongFlight, Unknown, NotAuthorised (refused at loading), PaxNotBoarded, Offloaded. |
+| OFFLOADED | Status `Offloaded`, or its BSM was deleted. |
+| HELD | `CheckedIn` or `Sorted`, but no authority to load (ticket not valid) or passenger not boarded: will be refused at loading. |
+| IN SCAN | Read in the last 3 s. |
+| MATCHED | `CheckedIn` or further, nothing wrong. |
+| EXPECTED | BSM received, tag not read yet. |
+
 ## Before the demo
 
 1. **Close RFIDPoc.** Only one app can stream from the reader at a time.
