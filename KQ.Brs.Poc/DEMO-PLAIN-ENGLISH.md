@@ -1,18 +1,19 @@
-# KQ-504 RFID demo: a plain-English guide
+# KQ-504 RFID demo guide
 
-## What this demo shows
+## Description
 
 The demo follows a bag from the check-in desk to the aircraft hold, tracked by a small radio chip in its bag tag. At each stop a reader picks up the chip without anyone scanning a barcode, and the computer checks the bag is going where it should. If a bag is about to be loaded onto the wrong plane, or belongs to a passenger who shouldn't fly, the screen sounds an alarm and stops it.
 
 Everything runs on a desk: one reader, four antennas standing in for places in the airport, and real tags you carry from antenna to antenna. It's a first look to help decide what equipment to buy for a proper lab, so expect it to be a bit rough around the edges.
 
-## Words you'll hear
+## Terminologies
 
 | Word | What it means |
 | --- | --- |
 | RFID tag | A sticker with a tiny chip and aerial in it. A reader can pick it up by radio from a short distance, with no line of sight needed. |
 | Reader and antennas | The grey box is the reader. The four flat panels plugged into it are its antennas: each one "listens" for tags in front of it. |
 | Licence plate | The 10-digit number on every bag tag, e.g. 0706200001. It's the bag's ID. In the demo it's written into the chip. |
+| Type B message | The standard short text message airlines and airports have used for decades to tell each other about passengers and bags. It's plain text with one fact per line, e.g. `.N/0706200001001` for the bag's licence plate. BSM, BPM and CHG below are all Type B messages. In the app, the **Type B messages** page shows them: **Inbox** is what the airline sent us, **Outbox** is what the baggage system sent back. |
 | BSM | Baggage Source Message. When a passenger checks in, the airline's check-in system sends this message to say "this passenger has this bag, with this licence plate, on this flight". It's how the baggage system learns a bag exists. |
 | BPM | Baggage Processed Message. The baggage system sends it when a bag is sorted or loaded: "bag X was seen here". |
 | CHG / DEL | A change to, or cancellation of, a BSM. For example, the passenger didn't board, or their ticket is no longer valid. |
@@ -61,27 +62,27 @@ One bag, start to finish, takes about 3 minutes. Each step says what to do, then
 
 ### 1. A passenger checks in
 
-**Do:** on the **Dashboard**, click **Add passenger**. Type a surname and initial (a volunteer from the audience works well), leave 1 bag and **Ticket valid** on, then confirm.
+**Function:** on the **Dashboard**, click **Add passenger**. Type a surname and initial (a volunteer from the audience works well), leave 1 bag and **Ticket valid** on, then confirm.
 
-**Say:** "This is the airline's check-in system telling the baggage system about the bag. That message is called a BSM." You can show it under **Type B messages → Inbox**. The bag appears on the Dashboard as **EXPECTED**: the system knows it's coming but hasn't seen it yet.
+**Description:** "This is the airline's check-in system telling the baggage system about the bag. That message is called a BSM." You can show it under **Type B messages → Inbox**: each line of the message is one fact about the bag, such as the flight, the licence plate and the passenger's name. The bag appears on the Dashboard as **EXPECTED**: the system knows it's coming but hasn't seen it yet.
 
 ### 2. The bag tag is printed
 
-**Do:** a window pops up asking you to write the tag. Take **one** tag from the tin, hold it still on **antenna 0**, and click **Write tag**.
+**Function:** a window pops up asking you to write the tag. Take **one** tag from the tin, hold it still on **antenna 0**, and click **Write tag**.
 
-**Say:** "In an airport the desk prints a bag tag with a chip in it. Here we write the bag's number straight into the chip, then read it back to check." Keep the tag there.
+**Description:** "In an airport the desk prints a bag tag with a chip in it. Here we write the bag's number straight into the chip, then read it back to check." Keep the tag there.
 
 ### 3. Check-in confirmed
 
-**Do:** nothing extra. While the tag is still at antenna 0, the app reads it.
+**Function:** nothing extra. While the tag is still at antenna 0, the app reads it.
 
-**Say:** "The desk antenna has read the chip and matched it to the passenger's booking." The bag turns **CheckedIn** on the Dashboard.
+**Description:** "The desk antenna has read the chip and matched it to the passenger's booking." The bag turns **CheckedIn** on the Dashboard.
 
 ### 4. Through the sorting tunnel
 
-**Do:** carry the tag slowly between **antennas 1 and 2**.
+**Function:** carry the tag slowly between **antennas 1 and 2**.
 
-**Say:** "Behind the scenes the bag goes down a conveyor through a tunnel of antennas. Nobody has to scan it." The bag turns **Sorted**, and a BPM ("bag seen here") appears under **Type B messages → Outbox**.
+**Description:** "Behind the scenes the bag goes down a conveyor through a tunnel of antennas. Nobody has to scan it." The bag turns **Sorted**, and a BPM ("bag seen here") appears under **Type B messages → Outbox**.
 
 ### 5. Loading onto the aircraft
 
@@ -93,13 +94,13 @@ This step stands in for a baggage handler at the plane with a handheld scanner. 
 4. Hold the tag on **antenna 3**.
 5. The big panel turns green: **LOAD → AK8**. The bag is now **Loaded**.
 
-**Say:** "Before any bag goes into the hold, the system checks it's on this flight, the passenger is travelling and the ticket is valid. Green means go."
+**Description:** "Before any bag goes into the hold, the system checks it's on this flight, the passenger is travelling and the ticket is valid. Green means go."
 
 ### 6. Show the bag's history
 
-**Do:** on the **Dashboard**, click the bag.
+**Function:** on the **Dashboard**, click the bag.
 
-**Say:** "Every step is recorded with a time and place, and the record can't be changed afterwards." The **Live map** shows the same journey as a dot moving through the airport.
+**Description:** "Every step is recorded with a time and place, and the record can't be changed afterwards." The **Live map** shows the same journey as a dot moving through the airport.
 
 ## Showing what happens when something is wrong
 
@@ -117,11 +118,11 @@ Pick one or two of these, not all three.
 1. Add a second passenger and check in their bag (steps 1 to 3 above).
 2. **Move the tag away from antenna 0.** Then on the **Dashboard**, click that bag and choose **Flag tag as KQ-412 (misroute demo)**.
 3. **What you'll see:** the tag now belongs to a **new passenger** on flight KQ-412 to Dar es Salaam, with a made-up name (e.g. P. Omondi). Your passenger goes back to "awaiting check-in". On the Live map, their dot slides back and a red dot for the KQ-412 passenger appears under **Checked in**.
-4. **Say:** "Someone at check-in put a Dar es Salaam tag on a bag going to our KQ-504 conveyor."
+4. **Description:** "Someone at check-in put a Dar es Salaam tag on a bag going to our KQ-504 conveyor."
 5. Carry the tag through the **sorting tunnel** (antennas 1 and 2). A red label appears by the tunnel on the Live map, the red dot slides up into **Problems in the hall**, and the full-screen alarm fires.
 6. Click **Ready to rescan**, then hold the tag on **antenna 3**. The alarm clears, the dot moves to **Refused at loading**, and the record says the bag was taken off and re-routed.
 
-**Say:** "A bag heading for the wrong plane is caught before it gets anywhere near the aircraft."
+**Description:** "A bag heading for the wrong plane is caught before it gets anywhere near the aircraft."
 
 Why move the tag away first: if it's still on antenna 0 when you flag it, the desk reads it again as a wrong-flight bag, which muddles the story. To reset afterwards, click the KQ-412 bag and choose **Undo KQ-412 flag**: the tag goes back to your passenger.
 
@@ -132,7 +133,7 @@ Why move the tag away first: if it's still on antenna 0 when you flag it, the de
 3. On the Loading page, hold the tag on **antenna 3**. The red alarm fires: **No authority to load (ticket not valid)**.
 4. Clear it with **Supervisor override** (PIN 1234 and a reason).
 
-**Say:** "The airline can say 'don't load this bag' at any time, and the loading point enforces it."
+**Description:** "The airline can say 'don't load this bag' at any time, and the loading point enforces it."
 
 ### Passenger didn't board
 
@@ -143,23 +144,23 @@ Use a bag that's already **Loaded**.
 3. The red alarm fires: the bag has to come off the plane.
 4. Click **Ready to rescan** and hold the tag on **antenna 3** to confirm the bag was taken off.
 
-**Say:** "If a passenger doesn't turn up, their bag must not fly without them. The system knows exactly which container it's in."
+**Description:** "If a passenger doesn't turn up, their bag must not fly without them. The system knows exactly which container it's in."
 
 ## Finishing up
 
 ### Ready for the plane to leave?
 
-**Do:** on the **Dashboard**, click **Pre-pushback check**.
+**Function:** on the **Dashboard**, click **Pre-pushback check**.
 
-**Say:** "Before the plane leaves, one click shows whether every checked-in bag is on board and nothing needs to come off." Green **Clear for pushback** means all is well; the summary reads e.g. "1 of 1 bag(s) loaded". Amber **Not clear** lists the bags left behind or to be taken off.
+**Description:** "Before the plane leaves, one click shows whether every checked-in bag is on board and nothing needs to come off." Green **Clear for pushback** means all is well; the summary reads e.g. "1 of 1 bag(s) loaded". Amber **Not clear** lists the bags left behind or to be taken off.
 
 To show amber: add a passenger and check in their bag, but don't load it, then run the check again.
 
 ### The report
 
-**Do:** open **Reports**.
+**Function:** open **Reports**.
 
-**Say:** "This is what we'd use to judge the trial: how reliably each antenna read the tags (the target is over 99%), how many problems came up and how fast they were fixed." **Export** saves it as a file.
+**Description:** "This is what we'd use to judge the trial: how reliably each antenna read the tags (the target is over 99%), how many problems came up and how fast they were fixed." **Export** saves it as a file.
 
 The **Turnaround vs baseline flight** box compares loading speed with a normal flight. It only means something in a real trial, so skip it in this demo.
 
