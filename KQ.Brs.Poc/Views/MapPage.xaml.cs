@@ -62,11 +62,23 @@ public sealed partial class MapPage : Page
     private string? _lastLayout;   // what the dots last showed; they are only rebuilt when it changes
     private bool _built;
 
+    // A bag that changes area slides there along the belt instead of jumping, so the audience sees it move.
+    private const double MoveMs = 1400;
+    private readonly Dictionary<string, (Region Region, Point At)> _settled = new();   // where each bag's dot last landed
+    private readonly Dictionary<string, Move> _moves = new();
+
+    private sealed class Move(Point[] path)
+    {
+        public Point[] Path { get; } = path;
+        public long Start { get; } = Environment.TickCount64;
+        public List<(UIElement Part, double Dx, double Dy)> Parts { get; } = new();
+    }
+
     public MapPage()
     {
         InitializeComponent();
         _frame.Tick += (_, _) => Animate();
-        _refresh.Tick += (_, _) => { UpdateRates(); Render(); };
+        _refresh.Tick += (_, _) => { UpdateRates(); Render(); RenderTunnelDecision(); };
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -225,6 +237,7 @@ public sealed partial class MapPage : Page
         _lastLayout = layout;
         DotLayer.Children.Clear();
         _halos.Clear();
+        foreach (var move in _moves.Values) move.Parts.Clear();   // re-attached to the new elements as they are placed
 
         var groups = bags.GroupBy(r => Classify(r.Bag).Region).ToDictionary(g => g.Key, g => g.ToList());
 
@@ -323,8 +336,9 @@ public sealed partial class MapPage : Page
     private void AddBagDot(Rect area, int cols, int index, BagRowViewModel row, DateTimeOffset now)
     {
         var (x, y) = Slot(area, cols, index);
-        var (_, kind) = Classify(row.Bag);
+        var (region, kind) = Classify(row.Bag);
         var brush = KindBrush(kind);
+        var firstPart = DotLayer.Children.Count;
         var tracked = row.Plate == _tracked;
         var dimmed = _tracked != null && !tracked;
 
@@ -377,6 +391,83 @@ public sealed partial class MapPage : Page
             Place(tag, x + 26, y - 4);   // beside the dot, clear of the region label above
             DotLayer.Children.Add(tag);
         }
+
+        TrackMove(row.Plate, region, new Point(x, y), firstPart);
+    }
+
+    /// <summary>
+    /// Starts a slide when the bag has changed area since its dot last landed, and attaches everything just drawn for
+    /// it (dot, halo, tracking ring, name tag) to a slide in progress.
+    /// </summary>
+    private void TrackMove(string plate, Region region, Point to, int firstPart)
+    {
+        if (_settled.TryGetValue(plate, out var was) && was.Region != region)
+            _moves[plate] = new Move(BeltRoute(was.At, to));
+        _settled[plate] = (region, to);
+        if (!_moves.TryGetValue(plate, out var move)) return;
+
+        move.Path[^1] = to;   // its slot may have shifted while it was moving
+        for (var i = firstPart; i < DotLayer.Children.Count; i++)
+        {
+            var part = DotLayer.Children[i];
+            move.Parts.Add((part, Canvas.GetLeft(part) - to.X, Canvas.GetTop(part) - to.Y));
+        }
+        PlaceMove(move, Environment.TickCount64);
+    }
+
+    /// <summary>Down (or up) to the belt, along it, and out to the new place.</summary>
+    private static Point[] BeltRoute(Point from, Point to)
+    {
+        const double belt = 400 - Dot / 2;
+        return [from, new Point(from.X, belt), new Point(to.X, belt), to];
+    }
+
+    private static void PlaceMove(Move move, long now)
+    {
+        var t = Math.Clamp((now - move.Start) / MoveMs, 0, 1);
+        t = t < 0.5 ? 2 * t * t : 1 - Math.Pow(-2 * t + 2, 2) / 2;   // ease in and out
+
+        var lengths = move.Path.Zip(move.Path.Skip(1), (a, b) => Math.Sqrt((b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y))).ToArray();
+        var along = t * lengths.Sum();
+        var at = move.Path[^1];
+        for (var i = 0; i < lengths.Length; i++)
+        {
+            if (along <= lengths[i] && lengths[i] > 0)
+            {
+                var (a, b, f) = (move.Path[i], move.Path[i + 1], along / lengths[i]);
+                at = new Point(a.X + (b.X - a.X) * f, a.Y + (b.Y - a.Y) * f);
+                break;
+            }
+            along -= lengths[i];
+        }
+        foreach (var (part, dx, dy) in move.Parts) Place(part, at.X + dx, at.Y + dy);
+    }
+
+    /// <summary>For a few seconds after the tunnel reads a tag: what it decided, beside the tunnel.</summary>
+    private void RenderTunnelDecision()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var s = AppServices.State.ScanLog.FirstOrDefault(x => x.ScanPoint == ScanPoint.Belt04 && x.Outcome != nameof(ScanOutcome.Duplicate));
+        if (s == null || now - s.Utc > TimeSpan.FromSeconds(5))
+        {
+            TunnelDecision.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var who = s.Passenger.Length > 0 ? s.Passenger : s.Plate != "-" ? s.Plate : "…" + (s.Epc.Length > 6 ? s.Epc[^6..] : s.Epc);
+        var (text, brush) = s.Outcome switch
+        {
+            nameof(ScanOutcome.Matched) => ($"✓ Sorted · {who}", "StatusMatchedBrush"),
+            nameof(ScanOutcome.WrongFlight) => ($"✗ {s.Detail} · {who}", "StatusExceptionBrush"),
+            nameof(ScanOutcome.Offloaded) => ($"✗ Offloaded bag on the belt · {who}", "StatusExceptionBrush"),
+            nameof(ScanOutcome.Unknown) => ($"? Unknown tag {who}", "StatusExceptionBrush"),
+            _ => ($"{s.Detail} · {who}", "StatusInScanBrush"),
+        };
+        TunnelDecisionText.Text = text;
+        TunnelDecision.Background = Ui.Resource(brush);
+        TunnelDecision.Visibility = Visibility.Visible;
+        TunnelDecision.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Canvas.SetLeft(TunnelDecision, 690 - TunnelDecision.DesiredSize.Width);   // right edge just left of the tunnel
     }
 
     private void AddUnknownDot(Rect area, int cols, int index, ScanLogViewModel s)
@@ -427,6 +518,13 @@ public sealed partial class MapPage : Page
             var active = last is { } t && now - t < TimeSpan.FromSeconds(1.5);
             Pulse(r1, active, (ms % 1400) / 1400.0);
             Pulse(r2, active, ((ms + 700) % 1400) / 1400.0);
+        }
+
+        var tick = Environment.TickCount64;
+        foreach (var (plate, move) in _moves.ToList())
+        {
+            PlaceMove(move, tick);
+            if (tick - move.Start >= MoveMs) _moves.Remove(plate);
         }
 
         foreach (var (ring, phase) in _halos)

@@ -29,10 +29,13 @@ The flight starts **empty**. You add each passenger yourself and check in their 
 3. **Check in (take-on).** Hold the tag at **antenna 0**. The app reads the plate from the chip, confirms it against the BSM (FR-02), and the bag turns **CheckedIn**. A plain (unwritten) tag is linked to the next passenger waiting for one instead. A tag held at check-in with nobody waiting shows *"Tag not linked: add the passenger first"*.
 4. **Sorting tunnel.** Carry the tag between **antennas 1 and 2**. The bag turns **Sorted** and a BPM appears in the **Outbox**.
 5. **Loading.** Open **Loading · Hold 2**, pick **ULD AK8** and switch **Loading antenna (3) armed** on. Hold the tag at **antenna 3**. The page shows a green **LOAD → AK8** and the bag is **Loaded**. Click the bag on the dashboard to see its full audit trail.
-6. **Misroute (spec 7.2).** First switch on **Settings → Demo → Show misroute demo** and save (it is off by default). Add a second passenger and check in their bag. On the dashboard, click the row and choose **Flag tag as KQ-412**. A KQ-412 BSM is sent, and the tag now belongs to a Dar es Salaam bag.
-   - Carry it through the **sorting tunnel**: the full-screen **DO NOT LOAD** alarm sounds and the app locks.
-   - Click **Ready to rescan**, wait a moment, then present the tag at **antenna 3**. The alarm clears, and the audit trail records *"removed and re-routed to KQ412"*.
+6. **Misroute (spec 7.2).** First switch on **Settings → Demo → Show misroute demo** and save (it is off by default). Add a second passenger and check in their bag. **Move the tag away from antenna 0**, then on the dashboard click the row and choose **Flag tag as KQ-412 (misroute demo)**.
+   - A KQ-412 BSM is sent for a **new passenger** with a generated name (e.g. P. Omondi), and the tag moves to that Dar es Salaam bag. Your KQ-504 passenger goes back to **Expected**. On the Live map, their dot slides back to *Awaiting check-in* and a red KQ-412 dot appears under *Checked in*.
+   - Keep the tag off antenna 0 while flagging: otherwise the desk reads it again as a wrong-flight bag, which muddles the story.
+   - Carry it through the **sorting tunnel**: the Live map shows *"✗ Wrong flight: belongs to KQ412"* by the tunnel, the dot slides into *Problems in the hall*, and the full-screen **DO NOT LOAD** alarm sounds and the app locks.
+   - Click **Ready to rescan**, wait a moment, then present the tag at **antenna 3**. The alarm clears, the dot moves to *Refused at loading*, and the audit trail records *"removed and re-routed to KQ412"*.
    - Alternatively, use **Supervisor override** (PIN `1234`, a reason is required).
+   - To reset, open the KQ-412 bag and choose **Undo KQ-412 flag**: the tag returns to the KQ-504 passenger.
 7. **Ticket problem (FR-05).** Check that **Settings → Authority to load is Y (ticket valid)** is on. The check runs only at loading: check-in and the tunnel let the bag through, and the ramp stops it.
    - Click **Add passenger** with **Ticket valid** switched off. In **Type B messages → Inbox**, the BSM's `.S/` line starts with `N`: the DCS saying "don't load".
    - Write the tag and check it in at **antenna 0**. The bag turns **CheckedIn** with a **Held** badge (amber on the Live map).

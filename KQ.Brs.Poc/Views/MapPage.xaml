@@ -143,7 +143,20 @@
 
                     <!-- Tunnel housing over the belt -->
                     <Rectangle Canvas.Left="700" Canvas.Top="352" Width="200" Height="96" RadiusX="12" RadiusY="12" Fill="{ThemeResource MapTunnel}" Opacity="0.92" />
-                    <TextBlock Canvas.Left="760" Canvas.Top="388" Text="TUNNEL" FontSize="14" FontWeight="Bold" CharacterSpacing="160" Foreground="White" Opacity="0.85" />
+                    <StackPanel Canvas.Left="700" Canvas.Top="376" Width="200" Spacing="2">
+                        <TextBlock Text="TUNNEL" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" CharacterSpacing="160" Foreground="White" Opacity="0.85" />
+                        <TextBlock Text="reads the tag from both sides" HorizontalAlignment="Center" FontSize="11" Foreground="White" Opacity="0.75" />
+                    </StackPanel>
+
+                    <!-- What the tunnel decides: on the KQ-504 list → Sorted (below); anything else → Problems (above) -->
+                    <Path Data="M 1000,382 L 1000,328" Stroke="{ThemeResource StatusExceptionBrush}" StrokeThickness="3" />
+                    <Path Data="M 992,334 L 1000,320 L 1008,334 Z" Fill="{ThemeResource StatusExceptionBrush}" />
+                    <TextBlock Canvas.Left="705" Canvas.Top="297" Width="320" TextAlignment="Right" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{ThemeResource StatusExceptionBrush}" Text="✗ wrong flight · offloaded · unknown tag" />
+                    <Path Data="M 1000,418 L 1000,472" Stroke="{ThemeResource StatusMatchedBrush}" StrokeThickness="3" />
+                    <Path Data="M 992,466 L 1000,480 L 1008,466 Z" Fill="{ThemeResource StatusMatchedBrush}" />
+                    <TextBlock Canvas.Left="805" Canvas.Top="489" Width="220" TextAlignment="Right" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{ThemeResource StatusMatchedBrush}" Text="✓ on the KQ-504 list" />
 
                     <!-- Route highlight for the tracked bag (drawn over the belt) -->
                     <Path x:Name="RouteDeskToTunnel" Data="M 250,400 L 700,400" StrokeThickness="8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Visibility="Collapsed" />
@@ -153,6 +166,11 @@
                     <!-- Live layers -->
                     <Canvas x:Name="DotLayer" />
                     <Canvas x:Name="BeaconLayer" />
+
+                    <!-- The tunnel's latest decision, for a few seconds after each read (right edge at x 690, left of the tunnel) -->
+                    <Border x:Name="TunnelDecision" Canvas.Top="347" CornerRadius="13" Padding="12,4" Visibility="Collapsed" IsHitTestVisible="False">
+                        <TextBlock x:Name="TunnelDecisionText" FontSize="13" FontWeight="SemiBold" Foreground="White" />
+                    </Border>
                 </Canvas>
             </Viewbox>
         </Border>
