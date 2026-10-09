@@ -42,7 +42,11 @@ The flight starts **empty**. You add each passenger yourself and check in their 
    - Alternatively, show an already-loaded bag losing its authority: load a valid passenger's bag, then on **Type B messages** apply a **CHG** for that plate with `.S/N/...`. The alarm fires, the bag must come off, and it is listed under bags to offload in the **Pre-pushback check**.
 8. **Passenger no-show (FR-10).** On **Type B messages**, click **Example: no-show CHG**, check the `.N/` line holds the loaded bag's plate, then **Apply**. The loaded bag must come off: the alarm fires. Rescan at antenna 3 to confirm the offload (a BUM is sent).
 9. **MQ outage.** Switch **IBM MQ link** off, scan a tag (the message shows as queued), then switch it back on. The queued messages are sent (at-least-once delivery).
-10. **Before pushback.** On the Dashboard, run **Pre-pushback check**. It lists bags checked in but not loaded, and bags to offload.
+10. **Before pushback (FR-10).** On the Dashboard, click **Pre-pushback check**. The summary reads e.g. *"1 of 1 bag(s) loaded · 0 checked in but not loaded · 0 to offload · 0 never checked in"*.
+    - **Clear:** with every checked-in bag loaded and nothing to offload, it shows a green **Clear for pushback**. Bags that were never checked in are counted but don't block pushback.
+    - **Bag left behind:** add a passenger, write and check in their tag at **antenna 0** (and sort it if you like), but don't load it. Run the check again: it turns amber, **Not clear for pushback**, and lists the bag under **Checked in, not loaded**.
+    - Click **Raise NotLoaded exceptions**. A toast confirms how many were raised, and each bag gets a **NotLoaded** exception.
+    - **Bag to offload:** a loaded bag whose passenger isn't flying (step 8) or whose ticket is no longer valid (step 7, CHG with `.S/N/...`) is listed under **Offload required** until it is rescanned off at antenna 3.
 11. **Evaluation.** Open **Reports**: read rate per scan point and antenna, exceptions and time to resolve. Use **Export** to save Markdown or CSV.
 
 ## Good to know
