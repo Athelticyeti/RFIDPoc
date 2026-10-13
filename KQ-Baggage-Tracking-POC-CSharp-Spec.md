@@ -14,7 +14,7 @@ This spec defines a .NET 8 (C#) Baggage Reconciliation System (BRS) that tracks 
 | Flight | KQ-504, NBO to EBB (Entebbe), single intra-Africa route |
 | Volume | 350 passengers, 700 bags (2 per passenger) |
 | Scan points | 3: check-in desk (Desk 14), conveyor tunnel (Belt 04), ramp handheld (ULD AK7/AK8, Hold 2) |
-| Tags | UHF RFID (EPC Gen2), 10-digit IATA licence plate; single-use for economy, reusable for Business/SkyPriority |
+| Tags | UHF RFID (EPC Gen2), 10-digit IATA licence plate; single-use for economy; reusable tags to be assessed for Business/SkyPriority |
 | Fixed reader | Alien ALR-9900+ EMA (conveyor tunnel; optionally the check-in desk) |
 | Messaging | IATA Type B / MQ, RP 1745 messages: BSM, BPM, BTM, BUM |
 | Target read rate | > 99% |
@@ -22,6 +22,8 @@ This spec defines a .NET 8 (C#) Baggage Reconciliation System (BRS) that tracks 
 **In scope:** reading tags at the 3 scan points, taking in BSMs from the DCS, matching bags to the flight manifest in real time, authorising ramp loading, handling exceptions (wrong-flight alerts), a live ramp dashboard, an audit trail, and evaluation reports.
 
 **Out of scope for the POC:** more than one flight, controlling the sorter, connecting to the airport's baggage handling system (BHS) PLCs, charging tags to passengers, and replacing the production DCS or BRS.
+
+**Runs alongside live systems:** the POC is a "non-intrusive integration alongside Kenya Airways DCS and airport baggage handling infrastructure" (source deck, slide 5). It runs in parallel with live operations and does not modify live check-in equipment (including bag tag printers), the DCS or the BHS.
 
 ## 2. Solution architecture
 
